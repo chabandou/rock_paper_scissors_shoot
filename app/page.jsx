@@ -63,8 +63,26 @@ export default function Home() {
     if (gameState[player].deck.length > 0) {
       let card = gameState[player].deck.pop();
       gameState[player].hand.push(card);
-      setGameState({ ...gameState });
+      setGameState((prevState) => {
+        return {
+          ...prevState,
+          [player]: {
+            ...prevState[player],
+            hand: gameState[player].hand,
+          },
+        };
+      });
     }
+
+    // if (player === "player1") {
+    //   console.log(
+    //     "from after drawCard Fn \n",
+    //     "hand:",
+    //     gameState.player1.hand,
+    //     "\n deck:",
+    //     gameState.player1.deck
+    //   );
+    // }
   }
 
   function roundSetup() {
@@ -73,7 +91,6 @@ export default function Home() {
       drawCard("player1");
       drawCard("player2");
     }
-    setGameState({ ...gameState });
   }
 
   /// Game Initialization
@@ -109,62 +126,89 @@ export default function Home() {
   const [roundWinner, setRoundWinner] = useState(null);
 
   useEffect(() => {
+    // console.log("from before playRound and pan used: \n", gameState.player1.hand);
+    
     let player1Card = gameState.player1.activeCard;
     let player2Card = gameState.player2.activeCard;
 
     // Check if both players have selected a card
     if (player1Card && player2Card) {
-      if (player2Card === "shoot" && gameState.player1.hand.includes("pan")) {
-        document.getElementById("panModal").showModal();
-        if (panUsed === false || panUsed === true) {
-          if (panUsed === false) playRound(player1Card, player2Card);
-          if (panUsed === true) {
-            let indexOfPan = gameState.player1.hand.indexOf("pan");
-            gameState.player1.hand.splice(indexOfPan, 1);
-            gameState.player1.hand.unshift(player1Card);
-            setGameState({...gameState, player1: {...gameState.player1, hand: gameState.player1.hand}});
-            playRound("pan", "shoot");
-          }
-        }
+      if (player2Card === "shoot" && gameState.player1.hand.includes("pan") && gameState.player1.activeCard !== "pan") {
+          handlePanCounter(1);
       } else if (
         player1Card === "shoot" &&
         gameState.player2.hand.includes("pan")
       ) {
-        let index = gameState.player2.hand.indexOf("pan");
-        let newHand = gameState.player2.hand.splice(index, 1);
-        gameState.player2.hand.unshift(player2Card);
-        setGameState((prevState) => {
-          return {
-            ...prevState,
-            player2: {
-              ...prevState.player2,
-              hand: newHand,
-            },
-          };
-        });
-        playRound("shoot", "pan");
+        handlePanCounter(2);
       } else {
         playRound(player1Card, player2Card);
       }
     }
-  }, [gameState.player1.activeCard, gameState.player2.activeCard, panUsed]);
+  }, [gameState.player1.activeCard, gameState.player2.activeCard]);
 
-  const handleCardSelection = (player, cardIndex) => {
-    // Remove the played card from the player's hand and set it as the active card
+  function handlePanCounter(player) {
     if (player === 1) {
+      document.getElementById("panModal").showModal();
+    } else if (player === 2) {
+      gameState.player2.hand.unshift(gameState.player2.activeCard);
       setGameState((prevState) => {
-        const newHand = prevState.player1.hand.filter(
-          (_, index) => index !== cardIndex
-        );
+        return {
+          ...prevState,
+          player2: {
+            ...prevState.player2,
+            hand: gameState.player2.hand,
+            activeCard: null,
+          },
+        };
+      })
+      handleCardSelection(2, gameState.player2.hand.indexOf("pan"));
+
+      // setPanUsed(null)
+    }
+  }
+
+  useEffect(() => {
+    if (panUsed) {
+      gameState.player1.hand.unshift(gameState.player1.activeCard);
+      gameState.player1.activeCard = null;
+      setGameState((prevState) => {
         return {
           ...prevState,
           player1: {
             ...prevState.player1,
-            hand: newHand,
-            activeCard: gameState.player1.hand[cardIndex],
+            hand: gameState.player1.hand,
+            activeCard: gameState.player1.activeCard,
+          },
+        };
+      })
+      handleCardSelection(1, gameState.player1.hand.indexOf("pan"));
+
+      // setPanUsed(null);
+    }
+  }, [panUsed]);
+
+  const handleCardSelection = (player, cardIndex) => {
+    // Remove the played card from the player's hand and set it as the active card
+    if (player === 1) {
+      gameState.player1.activeCard = gameState.player1.hand[cardIndex];
+      gameState.player1.hand = gameState.player1.hand.filter((_, index) => index !== cardIndex);
+      setGameState((prevState) => {
+        return {
+          ...prevState,
+          player1: {
+            ...prevState.player1,
+            hand: gameState.player1.hand,
+            activeCard: gameState.player1.activeCard,
           },
         };
       });
+      // console.log(
+      //   "from after handleCardSelection Fn \n",
+      //   "hand:",
+      //   gameState.player1.hand,
+      //   "\n deck:",
+      //   gameState.player1.deck
+      // );
     } else {
       setGameState((prevState) => {
         const newHand = prevState.player2.hand.filter(
@@ -183,6 +227,13 @@ export default function Home() {
   };
 
   function playRound(player1Card, player2Card) {
+    // console.log(
+    //   "from before playRound Fn \n",
+    //   "hand:",
+    //   gameState.player1.hand,
+    //   "\n deck:",
+    //   gameState.player1.deck
+    // );
     matchLog.push(
       "Round " + gameState.round + ": " + player1Card + " vs. " + player2Card
     );
@@ -281,12 +332,12 @@ export default function Home() {
       setGameState(newGameState);
       setRoundWinner(null);
     }, 2000);
-    console.log(
-      "player1 hand",
-      gameState.player1.hand,
-      "player2 hand",
-      gameState.player2.hand
-    );
+    // console.log(
+    //   "player1 hand",
+    //   gameState.player1.hand,
+    //   "player2 hand",
+    //   gameState.player2.hand
+    // );
   }
 
   function handleCardEffect(player, card, index) {
@@ -311,11 +362,6 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen items-center justify-center p-6">
-      <div className="z-10 w-full max-w-5xl flex flex-col items-center justify-center">
-        {matchLog.map((match, i) => (
-          <h3 key={i}>{match}</h3>
-        ))}
-      </div>
       <div className="z-10 w-full max-w-5xl items-center justify-between lg:flex flex-col">
         <Modal
           selectedPowerCards={selectedPowerCards}
@@ -371,4 +417,13 @@ export default function Home() {
       </div>
     </main>
   );
+}
+
+{
+  /* <div className="z-10 w-full max-w-5xl flex flex-col items-center justify-center">
+<h2 className="text-3xl font-bold">Match Log</h2>
+{matchLog.map((match, i) => (
+  <h3 key={i}>{match}</h3>
+))}
+</div> */
 }

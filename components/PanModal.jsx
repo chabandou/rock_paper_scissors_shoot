@@ -1,29 +1,11 @@
 import { cardsCounter } from "@/libs/utils";
 import { useEffect } from "react";
 
-export default function PanModal({
-    panUsed,
-    setPanUsed,
-    hand,
-    setGameState
-}) {
+export default function PanModal({ panUsed, setPanUsed }) {
+  function handleUsePan() {
+    setPanUsed(true);
+  }
 
-    function handleUsePan() {
-        let index = hand.indexOf("pan");
-        let newHand = hand.splice(index, 1);
-        setPanUsed(true);
-        setGameState((prevState) => {
-            return {
-                ...prevState,
-                player1: {
-                    ...prevState.player1,
-                    hand: newHand,
-                },
-            };
-        })
-    }
-
- 
   return (
     <>
       <button
@@ -34,21 +16,23 @@ export default function PanModal({
       </button>
       <dialog id="panModal" className="modal">
         <div className="modal-box space-y-4">
-          <h3 className="font-bold text-lg">Do you want to use your Pan as a counter?</h3>
+          <h3 className="font-bold text-lg">
+            Do you want to use your Pan as a counter?
+          </h3>
           <p className="">
-            Your opponent just played a powerful Shoot card.
-            Do you want to use your Pan card to counter this? 
+            Your opponent just played a powerful Shoot card. Do you want to use
+            your Pan card to counter this?
           </p>
 
-            <form method="dialog">
-              <button className="btn" onClick={() => handleUsePan()} >
-                Use it!
-              </button>
-              <button className="btn" onClick={() => setPanUsed(false)}>
-                Not now.
-              </button>
-            </form>
-          </div>
+          <form method="dialog">
+            <button className="btn" onClick={() => handleUsePan()}>
+              Use it!
+            </button>
+            <button className="btn" onClick={() => setPanUsed(false)}>
+              Not now.
+            </button>
+          </form>
+        </div>
       </dialog>
     </>
   );

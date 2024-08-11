@@ -8,15 +8,24 @@ export default function Modal({
   setGameState,
   gameState,
 }) {
-
   function selectAIPowerCards() {
     let AIPowerCards = [];
-
+    let cardsCounter = {shoot: 0, pan: 0};
     for (let i = 0; i < 4; i++) {
-      if (cardsCounter(AIPowerCards)[PowerCARDS[i]] < 3) {
-        AIPowerCards.push(PowerCARDS[Math.floor(Math.random() * 2)]);
+      let rand = Math.floor(Math.random() * 2);
+      let SelectedCard = PowerCARDS[rand];
+      if (SelectedCard === "shoot") {
+        cardsCounter.shoot += 1;
+      } else {
+        cardsCounter.pan += 1;
       }
+      let SelectedCardCount = cardsCounter[SelectedCard];
+      if ( SelectedCardCount < 3) {
+        AIPowerCards.push(SelectedCard);
+      }
+     
     }
+
     return AIPowerCards;
   }
   useEffect(() => {
@@ -31,14 +40,9 @@ export default function Modal({
           ...prevState.player1,
           deck: [...prevState.player1.deck, ...selectedPowerCards],
         },
-      };
-    });
-    setGameState((prevState) => {
-      return {
-        ...prevState,
         player2: {
           ...prevState.player2,
-          deck: [...prevState.player1.deck, ...selectAIPowerCards()],
+          deck: [...prevState.player2.deck, ...selectAIPowerCards()],
         },
       };
     });
@@ -71,7 +75,7 @@ export default function Modal({
                   ])
                 }
                 disabled={
-                  cardsCounter(selectedPowerCards)[powerCard] === 3 ||
+                  cardsCounter(selectedPowerCards)[powerCard] === 4 ||
                   selectedPowerCards.length === 4
                 }
               >
@@ -91,7 +95,11 @@ export default function Modal({
               Reset
             </button>
             <form method="dialog">
-              <button className="btn" onClick={handleAddingPCards} disabled={selectedPowerCards.length < 4}>
+              <button
+                className="btn"
+                onClick={handleAddingPCards}
+                disabled={selectedPowerCards.length < 4}
+              >
                 Start Game
               </button>
             </form>
