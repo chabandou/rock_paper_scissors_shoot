@@ -10,42 +10,53 @@ export default function Modal({
 }) {
   function selectAIPowerCards() {
     let AIPowerCards = [];
-    let cardsCounter = {shoot: 0, pan: 0};
-    for (let i = 0; i < 4; i++) {
+    let cardsCounter = { shoot: 0, pan: 0 };
+    while (AIPowerCards.length < 4) {
       let rand = Math.floor(Math.random() * 2);
       let SelectedCard = PowerCARDS[rand];
+      console.log(SelectedCard);
       if (SelectedCard === "shoot") {
         cardsCounter.shoot += 1;
       } else {
         cardsCounter.pan += 1;
       }
       let SelectedCardCount = cardsCounter[SelectedCard];
-      if ( SelectedCardCount < 3) {
+
+      if (SelectedCardCount < 4) {
         AIPowerCards.push(SelectedCard);
       }
-     
     }
+    // console.log("cardsCounter", cardsCounter);
+    // console.log(AIPowerCards);
 
     return AIPowerCards;
   }
   useEffect(() => {
-    document.getElementById("my_modal_1").showModal();
-  }, []);
+    if (gameState.round === 0) {
+      document.getElementById("my_modal_1").showModal();
+    }
+  }, [gameState.round]);
 
   function handleAddingPCards() {
+    gameState.player1.deck = [...gameState.player1.deck, ...selectedPowerCards];
+    gameState.player2.deck = [
+      ...gameState.player2.deck,
+      ...selectAIPowerCards(),
+    ];
     setGameState((prevState) => {
       return {
         ...prevState,
         player1: {
           ...prevState.player1,
-          deck: [...prevState.player1.deck, ...selectedPowerCards],
+          deck: gameState.player1.deck,
         },
         player2: {
           ...prevState.player2,
-          deck: [...prevState.player2.deck, ...selectAIPowerCards()],
+          deck: gameState.player2.deck,
         },
       };
     });
+    // console.log(gameState.player2.deck);
   }
 
   return (

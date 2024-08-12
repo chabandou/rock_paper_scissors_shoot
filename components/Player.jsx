@@ -1,3 +1,4 @@
+import { cardsCounter } from "@/libs/utils";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 
@@ -10,18 +11,21 @@ export default function Player({
   handleCardSelection,
   handleCardEffect,
   setGameState,
+  endFusion,
+  fusionState,
+  setFusionState,
+  fusionMaterial,
+  setFusionMaterial,
 }) {
-  let { hand, deck, discard: playerDiscard, activeCard, health } = playerState;
+  let {
+    hand,
+    deck,
+    discard: playerDiscard,
+    activeCard,
+    health,
+  } = player === 1 ? gameState.player1 : gameState.player2;
 
   let { round } = gameState;
-  const [fusionState, setFusionState] = useState({
-    player1: false,
-    player2: false,
-  });
-  const [fusionMaterial, setFusionMaterial] = useState({
-    player1: {},
-    player2: {},
-  });
 
   // FUSION FUNCTIONS //
 
@@ -36,108 +40,6 @@ export default function Player({
       };
       setFusionState({ player1: false, player2: true });
       setFusionMaterial({ player1: {}, player2: fusionMaterial.player2 });
-    }
-  }
-
-  function endFusion(e, index, player) {
-    console.log("endFusion TRIGGERED ****************");
-
-    let card2 =
-      player === 1
-        ? { card: e.target.innerText, index: index }
-        : { card: e, index: index };
-    const card1 =
-      player === 1 ? fusionMaterial.player1 : fusionMaterial.player2;
-    if (card1.index !== index) {
-      // Dinner or Rifle fusion
-      if (card1.card === card2.card) {
-        if (card1.card === "pan" || card1.card === "shoot") {
-          hand = hand.filter(
-            (card, i) => i !== card1.index && i !== card2.index
-          );
-          card1.card === "pan" ? hand.push("dinner") : hand.push("rifle");
-        }
-        setFusionState({ player1: false, player2: false });
-        setFusionMaterial({});
-      }
-
-      // pan + basic card fusion
-      else if (
-        (card1.card === "pan" &&
-          (card2.card === "rock" ||
-            card2.card === "paper" ||
-            card2.card === "scissors")) ||
-        (card2.card === "pan" &&
-          (card1.card === "rock" ||
-            card1.card === "paper" ||
-            card1.card === "scissors"))
-      ) {
-        console.log("PAN FUSION TRIGGERED ****************");
-        hand = hand.filter((card, i) => i !== card1.index && i !== card2.index);
-        if (
-          card1.card === "pan" &&
-          (card2.card === "rock" ||
-            card2.card === "paper" ||
-            card2.card === "scissors")
-        ) {
-          console.log("PAN FUSION TRIGGERED 2222 ****************");
-          hand.push(card2.card + "pan");
-        } else {
-          console.log("PAN FUSION TRIGGERED 3333 ****************");
-
-          hand.push(card1.card + "pan");
-        }
-
-        setFusionState({ player1: false, player2: false });
-        setFusionMaterial({});
-      }
-
-      // shoot + basic card fusion
-      else if (
-        (card1.card === "shoot" &&
-          (card2.card === "rock" ||
-            card2.card === "paper" ||
-            card2.card === "scissors")) ||
-        (card2.card === "shoot" &&
-          (card1.card === "rock" ||
-            card1.card === "paper" ||
-            card1.card === "scissors"))
-      ) {
-        hand = hand.filter((card, i) => i !== card1.index && i !== card2.index);
-        if (
-          card1.card === "shoot" &&
-          (card2.card === "rock" ||
-            card2.card === "paper" ||
-            card2.card === "scissors")
-        ) {
-          hand.push(card2.card + "shoot");
-          
-        } else {
-          hand.push(card1.card + "pan");
-        }
-
-        setFusionState({ player1: false, player2: false });
-        setFusionMaterial({});
-      }
-
-      player === 1 &&
-        setGameState({
-          ...gameState,
-          player1: {
-            ...gameState.player1,
-            hand: hand,
-          },
-        });
-      player === 2 &&
-        setGameState((prevState) => {
-          return {
-            ...prevState,
-            player2: {
-              ...prevState.player2,
-              hand: hand,
-            },
-          };
-        });
     }
   }
 
@@ -184,13 +86,19 @@ export default function Player({
         //   randomStrategy(hand);
         // }
 
+        // Power Card + Basic Card AI Fusion
+
+        let randomNum = Number(Math.random());
+
         if (
-          hand.includes("pan") &&
+          (hand.includes("pan") || hand.includes("shoot")) &&
           (hand.includes("rock") ||
             hand.includes("scissors") ||
-            hand.includes("paper"))
+            hand.includes("paper")) && (randomNum <= 0.5)
         ) {
-          let indexOfFusionCard1 = hand.indexOf("pan");
+          let indexOfFusionCard1 = hand.includes("pan")
+            ? hand.indexOf("pan")
+            : hand.indexOf("shoot");
           function getCard2Index(hand) {
             let index;
             index = Math.floor(Math.random() * hand.length);
@@ -209,14 +117,42 @@ export default function Player({
           //   index: indexOfFusionCard2,
           // };
           endFusion(hand[indexOfFusionCard2], indexOfFusionCard2, 2);
+
+          setTimeout(() => selectRandomCard(), 500);
+
+        } else if ((cardsCounter(hand).pan > 1) && (randomNum <= 0.5)) {
+          let fusionCard1Index = hand.indexOf("pan");
+          function getCard2Index(hand) {
+            let index = hand.findIndex(
+              (card, i) => card === "pan" && i !== fusionCard1Index
+            );
+            return index;
+          }
+          let fusionCard2Index = getCard2Index(hand);
+          startFusion(hand[fusionCard1Index], fusionCard1Index, 2);
+          endFusion(hand[fusionCard2Index], fusionCard2Index, 2);
+
           console.log(
-            indexOfFusionCard1,
-            hand[indexOfFusionCard1],
-            indexOfFusionCard2,
-            hand[indexOfFusionCard2]
+            fusionCard1Index,
+            hand[fusionCard1Index],
+            fusionCard2Index,
+            hand[fusionCard2Index]
           );
 
-          selectRandomCard();
+          setTimeout(() => selectRandomCard(), 500);
+        } else if ((cardsCounter(hand).shoot > 1) && (randomNum <= 0.5)) {
+          let fusionCard1Index = hand.indexOf("shoot");
+          function getCard2Index(hand) {
+            let index = hand.findIndex(
+              (card, i) => card === "shoot" && i !== fusionCard1Index
+            );
+            return index;
+          }
+          let fusionCard2Index = getCard2Index(hand);
+          startFusion(hand[fusionCard1Index], fusionCard1Index, 2);
+          endFusion(hand[fusionCard2Index], fusionCard2Index, 2);
+
+          setTimeout(() => selectRandomCard(), 500);
         } else {
           let indexOfCardToSelect = Math.floor(Math.random() * hand.length);
           if (hand[indexOfCardToSelect] !== "pan") {
@@ -225,14 +161,56 @@ export default function Player({
             randomStrategy(hand);
           }
         }
+
+        if (gameState.player2.hand.includes("dinner")) {
+          let dinnerIndex = gameState.player2.hand.indexOf("dinner");
+          handleCardEffect(2, "dinner", dinnerIndex);
+        }
       }
 
       function selectRandomCard() {
-        let randIndex = Math.floor(Math.random() * hand.length);
-        if (hand[randIndex] !== "pan") {
+        let randIndex = Math.floor(
+          Math.random() * gameState.player2.hand.length
+        );
+        if (
+          gameState.player2.hand[randIndex] !== "pan" &&
+          gameState.player2.hand[randIndex] !== "dinner"
+        ) {
+          console.log("selecting random card");
+          console.log(gameState.player2.hand[randIndex]);
+
           handleCardSelection(2, randIndex);
+          console.log("selected random card");
         } else {
           selectRandomCard();
+        }
+      }
+
+      function handleCardEffect(player, card, index) {
+        if (card === "dinner") {
+          let { health, hand, discard } = gameState.player2;
+          health += 2;
+          drawCard("player2");
+          hand = hand.filter((_, i) => i !== index);
+          discard.push(card);
+          gameState.player2 = { ...gameState.player2, health, hand, discard };
+          setGameState({ ...gameState });
+        }
+      }
+
+      function drawCard(player) {
+        if (gameState[player].deck.length > 0) {
+          let card = gameState[player].deck.pop();
+          gameState[player].hand.push(card);
+          setGameState((prevState) => {
+            return {
+              ...prevState,
+              [player]: {
+                ...prevState[player],
+                hand: gameState[player].hand,
+              },
+            };
+          });
         }
       }
 
