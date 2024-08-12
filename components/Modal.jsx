@@ -57,6 +57,8 @@ export default function Modal({
       };
     });
     // console.log(gameState.player2.deck);
+    setSelectedPowerCards([]);
+    document.getElementById("my_modal_1").close();
   }
 
   return (
