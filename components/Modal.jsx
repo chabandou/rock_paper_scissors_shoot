@@ -7,6 +7,8 @@ export default function Modal({
   PowerCARDS,
   setGameState,
   gameState,
+  initialAIPowerCards,
+  setInitialAIPowerCards,
 }) {
   function selectAIPowerCards() {
     let AIPowerCards = [];
@@ -43,6 +45,7 @@ export default function Modal({
       ...gameState.player2.deck,
       ...selectAIPowerCards(),
     ];
+    setInitialAIPowerCards(gameState.player2.deck.slice(-4));
     setGameState((prevState) => {
       return {
         ...prevState,

@@ -36,3 +36,6 @@ export const fusionCards = [
         effect: "Damage -1 HP",
     }
 ]
+
+
+export const CARDS = ["rock", "paper", "scissors"];

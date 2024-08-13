@@ -1,15 +1,20 @@
 "use client";
 
+import EndGameModal from "@/components/endGameModal";
 import Modal from "@/components/Modal";
 import PanModal from "@/components/PanModal";
 import Player from "@/components/Player";
 import { cardsCounter, shuffle } from "@/libs/utils";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { CARDS } from "@/libs/cards";
 
 export default function Home() {
   const [panUsed, setPanUsed] = useState(null);
   const [matchLog, setMatchLog] = useState([]);
+  const [initialAIPowerCards, setInitialAIPowerCards] = useState([]);
+
+  const [gameWinner, setGameWinner] = useState("");
 
   /// Power Cards logic
 
@@ -29,8 +34,6 @@ export default function Home() {
   const [selectedPowerCards, setSelectedPowerCards] = useState([]);
 
   // Normal cards logic
-
-  let CARDS = ["rock", "paper", "scissors"];
 
   const initializeDeck = () => {
     let deck = [...CARDS, ...CARDS];
@@ -96,7 +99,11 @@ export default function Home() {
   /// Game Initialization
 
   useEffect(() => {
-    if (gameState.round === 0 && gameState.player1.deck.length === 10 && gameState.player2.deck.length === 10) {
+    if (
+      gameState.round === 0 &&
+      gameState.player1.deck.length === 10 &&
+      gameState.player2.deck.length === 10
+    ) {
       gameState.player1.deck = shuffle(gameState.player1.deck);
 
       gameState.player2.deck = shuffle(gameState.player2.deck);
@@ -104,30 +111,11 @@ export default function Home() {
     }
 
     if (gameState.player1.health <= 0) {
-      alert("Player 2 wins!");
-      resetGame();
+      setGameWinner("Player 2");
+      document.getElementById("endGameModal").showModal();
     } else if (gameState.player2.health <= 0) {
-      alert("Player 1 wins!");
-      resetGame();
-    }
-
-    function resetGame() {
-      gameState.round = 0;
-      gameState.player1 = {
-        hand: [],
-        deck: initializeDeck(),
-        discard: [],
-        activeCard: null,
-        health: 5,
-      };
-      gameState.player2 = {
-        hand: [],
-        deck: initializeDeck(),
-        discard: [],
-        activeCard: null,
-        health: 5,
-      };
-      setGameState({ ...gameState });
+      setGameWinner("Player 1");
+      document.getElementById("endGameModal").showModal();
     }
   }, [
     gameState.round,
@@ -162,6 +150,41 @@ export default function Home() {
       } else {
         playRound(player1Card, player2Card);
       }
+    }
+    if (player1Card && !player2Card) {
+      setTimeout(() => {
+        matchLog.push(
+          "Round " + gameState.round + ": " + player1Card + " vs. Player 2 Pass"
+        );
+        setMatchLog(matchLog);
+
+        let newGameState = { ...gameState };
+
+        if (player1Card === "rifle") {
+          newGameState.player2.health -= 3;
+        } else if (player1Card.includes("shoot") && player1Card.length > 5) {
+          newGameState.player2.health -= 2;
+        } else {
+          newGameState.player2.health -= 1;
+        }
+        setRoundWinner("player 1");
+
+        newGameState.round += 1;
+
+        // Remove the cards from the active cards
+        newGameState.player1.activeCard = null;
+
+        // Add the cards to the discard pile
+        newGameState.player1.discard.push(player1Card);
+
+        drawCard("player1");
+        drawCard("player2");
+
+        setTimeout(() => {
+          setGameState(newGameState);
+          setRoundWinner(null);
+        }, 1500);
+      }, 3000);
     }
   }, [gameState.player1.activeCard, gameState.player2.activeCard]);
 
@@ -203,7 +226,7 @@ export default function Home() {
       handleCardSelection(1, gameState.player1.hand.indexOf("pan"));
 
       // setPanUsed(null);
-    } else if(panUsed === false) {
+    } else if (panUsed === false) {
       playRound(gameState.player1.activeCard, gameState.player2.activeCard);
       setPanUsed(null);
     }
@@ -249,8 +272,10 @@ export default function Home() {
         },
       });
 
-      console.log("handled card selection for player 2", gameState.player2.activeCard);
-
+      console.log(
+        "handled card selection for player 2",
+        gameState.player2.activeCard
+      );
     }
   };
 
@@ -396,7 +421,6 @@ export default function Home() {
     }
   }
 
-
   // FUSION FUNCTIONS END
 
   const [fusionState, setFusionState] = useState({
@@ -425,12 +449,16 @@ export default function Home() {
             gameState.player1.hand = gameState.player1.hand.filter(
               (card, i) => i !== card1.index && i !== card2.index
             );
-            card1.card === "pan" ? gameState.player1.hand.push("dinner") : gameState.player1.hand.push("rifle");
+            card1.card === "pan"
+              ? gameState.player1.hand.push("dinner")
+              : gameState.player1.hand.push("rifle");
           } else if (player === 2) {
             gameState.player2.hand = gameState.player2.hand.filter(
               (card, i) => i !== card1.index && i !== card2.index
             );
-            card1.card === "pan" ? gameState.player2.hand.push("dinner") : gameState.player2.hand.push("rifle");
+            card1.card === "pan"
+              ? gameState.player2.hand.push("dinner")
+              : gameState.player2.hand.push("rifle");
           }
         }
         setFusionState({ player1: false, player2: false });
@@ -449,7 +477,13 @@ export default function Home() {
             card1.card === "scissors"))
       ) {
         console.log("PAN FUSION TRIGGERED ****************");
-        player === 1 ? gameState.player1.hand = gameState.player1.hand.filter((card, i) => i !== card1.index && i !== card2.index) : gameState.player2.hand = gameState.player2.hand.filter((card, i) => i !== card1.index && i !== card2.index);
+        player === 1
+          ? (gameState.player1.hand = gameState.player1.hand.filter(
+              (card, i) => i !== card1.index && i !== card2.index
+            ))
+          : (gameState.player2.hand = gameState.player2.hand.filter(
+              (card, i) => i !== card1.index && i !== card2.index
+            ));
         if (
           card1.card === "pan" &&
           (card2.card === "rock" ||
@@ -457,11 +491,15 @@ export default function Home() {
             card2.card === "scissors")
         ) {
           console.log("PAN FUSION TRIGGERED 2222 ****************");
-          player === 1 ? gameState.player1.hand.push(card2.card + "pan") : gameState.player2.hand.push(card2.card + "pan");
+          player === 1
+            ? gameState.player1.hand.push(card2.card + "pan")
+            : gameState.player2.hand.push(card2.card + "pan");
         } else {
           console.log("PAN FUSION TRIGGERED 3333 ****************");
 
-          player === 1 ? gameState.player1.hand.push(card1.card + "pan") : gameState.player2.hand.push(card1.card + "pan");
+          player === 1
+            ? gameState.player1.hand.push(card1.card + "pan")
+            : gameState.player2.hand.push(card1.card + "pan");
         }
 
         setFusionMaterial({});
@@ -478,16 +516,26 @@ export default function Home() {
             card1.card === "paper" ||
             card1.card === "scissors"))
       ) {
-        player === 1 ? gameState.player1.hand = gameState.player1.hand.filter((card, i) => i !== card1.index && i !== card2.index) : gameState.player2.hand = gameState.player2.hand.filter((card, i) => i !== card1.index && i !== card2.index);
+        player === 1
+          ? (gameState.player1.hand = gameState.player1.hand.filter(
+              (card, i) => i !== card1.index && i !== card2.index
+            ))
+          : (gameState.player2.hand = gameState.player2.hand.filter(
+              (card, i) => i !== card1.index && i !== card2.index
+            ));
         if (
           card1.card === "shoot" &&
           (card2.card === "rock" ||
             card2.card === "paper" ||
             card2.card === "scissors")
         ) {
-          player === 1 ? gameState.player1.hand.push(card2.card + "shoot") : gameState.player2.hand.push(card2.card + "shoot");
+          player === 1
+            ? gameState.player1.hand.push(card2.card + "shoot")
+            : gameState.player2.hand.push(card2.card + "shoot");
         } else {
-          player === 1 ? gameState.player1.hand.push(card1.card + "shoot") : gameState.player2.hand.push(card1.card + "pan");
+          player === 1
+            ? gameState.player1.hand.push(card1.card + "shoot")
+            : gameState.player2.hand.push(card1.card + "pan");
         }
 
         setFusionMaterial({});
@@ -502,17 +550,73 @@ export default function Home() {
           },
         });
       player === 2 &&
-        await setGameState({
+        (await setGameState({
           ...gameState,
           player2: {
             ...gameState.player2,
             hand: gameState.player2.hand,
           },
-        });
+        }));
 
-        setFusionMaterial({});
-        setTimeout(() => setFusionState({ player1: false, player2: false }), 1000);
+      setFusionMaterial({});
+      setTimeout(
+        () => setFusionState({ player1: false, player2: false }),
+        1000
+      );
     }
+  }
+
+  const [passedTurn, setPassedTurn] = useState(false);
+  function passTurn() {
+    setPassedTurn(true);
+    let newGameState = { ...gameState };
+
+    if (gameState.player2.activeCard) {
+      matchLog.push(
+        "Round " +
+          gameState.round +
+          ": Player 1 Pass" +
+          " vs." +
+          gameState.player2.activeCard
+      );
+      setMatchLog(matchLog);
+
+      if (gameState.player2.activeCard === "rifle") {
+        newGameState.player1.health -= 3;
+      } else if (
+        gameState.player2.activeCard.includes("shoot") &&
+        gameState.player2.activeCard.length > 5
+      ) {
+        newGameState.player1.health -= 2;
+      } else {
+        newGameState.player1.health -= 1;
+      }
+      setRoundWinner("player 2");
+
+      // Add the cards to the discard pile
+      newGameState.player2.discard.push(gameState.player2.activeCard);
+
+      // Remove the cards from the active cards
+      newGameState.player2.activeCard = null;
+    } else if (!gameState.player2.activeCard) {
+      matchLog.push(
+        "Round " + gameState.round + ": Player 1 Pass vs.Player 2 Pass"
+      );
+
+      setMatchLog(matchLog);
+
+      setRoundWinner("It's a tie!");
+    }
+
+    newGameState.round += 1;
+
+    drawCard("player1");
+    drawCard("player2");
+    setTimeout(() => {
+      setGameState(newGameState);
+      setRoundWinner(null);
+      setPassedTurn(false);
+    }, 1500);
   }
 
   return (
@@ -524,6 +628,8 @@ export default function Home() {
           PowerCARDS={PowerCARDS}
           gameState={gameState}
           setGameState={setGameState}
+          initialAIPowerCards={initialAIPowerCards}
+          setInitialAIPowerCards={setInitialAIPowerCards}
         />
         <PanModal
           panUsed={panUsed}
@@ -543,6 +649,13 @@ export default function Home() {
             className="object-contain absolute top-0 left-0 z-0"
           />
           <div className="">
+            <button
+              className="btn btn-outline absolute top-1/2 -translate-y-1/2 right-[15px]"
+              onClick={() => passTurn()}
+              disabled={passedTurn}
+            >
+              Pass turn
+            </button>
             <Player
               player={1}
               gameState={gameState}
@@ -570,9 +683,18 @@ export default function Home() {
               setFusionState={setFusionState}
               fusionMaterial={fusionMaterial}
               setFusionMaterial={setFusionMaterial}
+              initialAIPowerCards={initialAIPowerCards}
+              setInitialAIPowerCards={setInitialAIPowerCards}
             />
           </div>
         </section>
+        <EndGameModal
+          gameState={gameState}
+          setGameState={setGameState}
+          gameWinner={gameWinner}
+          setGameWinner={setGameWinner}
+          initializeDeck={initializeDeck}
+        />
         {roundWinner &&
           (roundWinner === "tie" ? (
             <h1 className="text-3xl">It's a tie!</h1>

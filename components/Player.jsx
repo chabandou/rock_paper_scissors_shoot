@@ -16,6 +16,7 @@ export default function Player({
   setFusionState,
   fusionMaterial,
   setFusionMaterial,
+  initialAIPowerCards,
 }) {
   let {
     hand,
@@ -62,43 +63,37 @@ export default function Player({
       // If AI has cards, AI will calculate the probability of remaining opponent cards
       if (hand.length > 0 && !activeCard) {
         setTimeout(() => {
-          //   switchStrategy();
-          //   switch (currentStrategy) {
-          //     case "random":
-          //       return randomStrategy(hand);
-          //     case "counter":
-          //       return counterStrategy();
-          //     case "probability":
-          //       return probabilityStrategy();
-          //     default:
-          //       return randomStrategy(hand);
-          //   }
-          randomStrategy(hand);
+            switchStrategy();
+            switch (currentStrategy) {
+              case "random":
+                return randomStrategy(hand);
+              case "counter":
+                return counterStrategy();
+              case "probability":
+                return probabilityStrategy();
+              default:
+                return probabilityStrategy();
+            }
         }, 2000);
       }
 
       // AI strategy functions
       function randomStrategy(hand) {
-        // let indexOfCardToSelect = Math.floor(Math.random() * hand.length);
-        // if (hand[indexOfCardToSelect] !== "pan") {
-        //   handleCardSelection(2, indexOfCardToSelect);
-        // } else {
-        //   randomStrategy(hand);
-        // }
 
         // Power Card + Basic Card AI Fusion
 
         let randomNum = Number(Math.random());
 
         if (
-          (hand.includes("pan") || hand.includes("shoot")) &&
-          (hand.includes("rock") ||
-            hand.includes("scissors") ||
-            hand.includes("paper")) && (randomNum <= 0.5)
+          (gameState.player2.hand.includes("pan") || gameState.player2.hand.includes("shoot")) &&
+          (gameState.player2.hand.includes("rock") ||
+            gameState.player2.hand.includes("scissors") ||
+            gameState.player2.hand.includes("paper")) &&
+          randomNum <= 0.5
         ) {
-          let indexOfFusionCard1 = hand.includes("pan")
-            ? hand.indexOf("pan")
-            : hand.indexOf("shoot");
+          let indexOfFusionCard1 = gameState.player2.hand.includes("pan")
+            ? gameState.player2.hand.indexOf("pan")
+            : gameState.player2.hand.indexOf("shoot");
           function getCard2Index(hand) {
             let index;
             index = Math.floor(Math.random() * hand.length);
@@ -107,7 +102,7 @@ export default function Player({
             }
             return index;
           }
-          let indexOfFusionCard2 = getCard2Index(hand);
+          let indexOfFusionCard2 = getCard2Index(gameState.player2.hand);
           // console.log(hand[indexOfFusionCard1], hand[indexOfFusionCard2]);
 
           startFusion(hand[indexOfFusionCard1], indexOfFusionCard1, 2);
@@ -116,49 +111,48 @@ export default function Player({
           //   card: hand[indexOfFusionCard2],
           //   index: indexOfFusionCard2,
           // };
-          endFusion(hand[indexOfFusionCard2], indexOfFusionCard2, 2);
+          endFusion(gameState.player2.hand[indexOfFusionCard2], indexOfFusionCard2, 2);
 
           setTimeout(() => selectRandomCard(), 500);
-
-        } else if ((cardsCounter(hand).pan > 1) && (randomNum <= 0.5)) {
-          let fusionCard1Index = hand.indexOf("pan");
+        } else if (cardsCounter(gameState.player2.hand).pan > 1 && randomNum <= 0.5) {
+          let fusionCard1Index = gameState.player2.hand.indexOf("pan");
           function getCard2Index(hand) {
             let index = hand.findIndex(
               (card, i) => card === "pan" && i !== fusionCard1Index
             );
             return index;
           }
-          let fusionCard2Index = getCard2Index(hand);
-          startFusion(hand[fusionCard1Index], fusionCard1Index, 2);
-          endFusion(hand[fusionCard2Index], fusionCard2Index, 2);
+          let fusionCard2Index = getCard2Index(gameState.player2.hand);
+          startFusion(gameState.player2.hand[fusionCard1Index], fusionCard1Index, 2);
+          endFusion(gameState.player2.hand[fusionCard2Index], fusionCard2Index, 2);
 
           console.log(
             fusionCard1Index,
-            hand[fusionCard1Index],
+            gameState.player2.hand[fusionCard1Index],
             fusionCard2Index,
-            hand[fusionCard2Index]
+            gameState.player2.hand[fusionCard2Index]
           );
 
           setTimeout(() => selectRandomCard(), 500);
-        } else if ((cardsCounter(hand).shoot > 1) && (randomNum <= 0.5)) {
-          let fusionCard1Index = hand.indexOf("shoot");
+        } else if (cardsCounter(gameState.player2.hand).shoot > 1 && randomNum <= 0.5) {
+          let fusionCard1Index = gameState.player2.hand.indexOf("shoot");
           function getCard2Index(hand) {
             let index = hand.findIndex(
               (card, i) => card === "shoot" && i !== fusionCard1Index
             );
             return index;
           }
-          let fusionCard2Index = getCard2Index(hand);
-          startFusion(hand[fusionCard1Index], fusionCard1Index, 2);
-          endFusion(hand[fusionCard2Index], fusionCard2Index, 2);
+          let fusionCard2Index = getCard2Index(gameState.player2.hand);
+          startFusion(gameState.player2.hand[fusionCard1Index], fusionCard1Index, 2);
+          endFusion(gameState.player2.hand[fusionCard2Index], fusionCard2Index, 2);
 
           setTimeout(() => selectRandomCard(), 500);
         } else {
-          let indexOfCardToSelect = Math.floor(Math.random() * hand.length);
-          if (hand[indexOfCardToSelect] !== "pan") {
+          let indexOfCardToSelect = Math.floor(Math.random() * gameState.player2.hand.length);
+          if (gameState.player2.hand[indexOfCardToSelect] !== "pan") {
             handleCardSelection(2, indexOfCardToSelect);
           } else {
-            randomStrategy(hand);
+            randomStrategy(gameState.player2.hand);
           }
         }
 
@@ -214,80 +208,421 @@ export default function Player({
         }
       }
 
-      //   function probabilityStrategy() {
-      //     const cardProbabilities = calculateProb();
-      //     const { rock, paper, scissors } = cardProbabilities;
+      /// ****** AI PROBABILITY STRATEGY  ******* ///
 
-      //     // Find the card with the highest winning probability
-      //     const winningProbabilities = {
-      //       rock: scissors, // Rock beats Scissors
-      //       paper: rock, // Paper beats Rock
-      //       scissors: paper, // Scissors beat Paper
-      //     };
+      function probabilityStrategy() {
+        // AI Fusion logic
 
-      //     // Choose the card with the highest winning probability
-      //     let bestCard = hand[0];
-      //     let bestProbability = winningProbabilities[bestCard];
+        if (cardsCounter(gameState.player2.hand).pan > 1 && gameState.player2.health < 4) {
+          let fusionCard1Index = gameState.player2.hand.indexOf("pan");
+          function getCard2Index(hand) {
+            let index = hand.findIndex(
+              (card, i) => card === "pan" && i !== fusionCard1Index
+            );
+            return index;
+          }
+          let fusionCard2Index = getCard2Index(gameState.player2.hand);
+          startFusion(
+            gameState.player2.hand[fusionCard1Index],
+            fusionCard1Index,
+            2
+          );
+          endFusion(
+            gameState.player2.hand[fusionCard2Index],
+            fusionCard2Index,
+            2
+          );
 
-      //     hand.forEach((card) => {
-      //       if (winningProbabilities[card] > bestProbability) {
-      //         bestCard = card;
-      //         bestProbability = winningProbabilities[card];
-      //       }
-      //     });
+          console.log(
+            fusionCard1Index,
+            gameState.player2.hand[fusionCard1Index],
+            fusionCard2Index,
+            gameState.player2.hand[fusionCard2Index]
+          );
 
-      //     let indexOfCardToSelect = hand.indexOf(bestCard);
-      //     handleCardSelection(2, indexOfCardToSelect);
-      //   }
+          setTimeout(() => chooseBasedOnProb(), 500);
+        } else if (cardsCounter(gameState.player2.hand).shoot > 1) {
+          let fusionCard1Index = gameState.player2.hand.indexOf("shoot");
+          function getCard2Index(hand) {
+            let index = hand.findIndex(
+              (card, i) => card === "shoot" && i !== fusionCard1Index
+            );
+            return index;
+          }
+          let fusionCard2Index = getCard2Index(gameState.player2.hand);
+          startFusion(
+            gameState.player2.hand[fusionCard1Index],
+            fusionCard1Index,
+            2
+          );
+          endFusion(
+            gameState.player2.hand[fusionCard2Index],
+            fusionCard2Index,
+            2
+          );
 
-      //   function counterStrategy() {
-      //     const lastPlayedCard = opponentDiscard[opponentDiscard.length - 1];
-      //     let counterCard;
+          setTimeout(() => chooseBasedOnProb(), 500);
+        } else if (
+          (gameState.player2.hand.includes("pan") || gameState.player2.hand.includes("shoot")) &&
+          (gameState.player2.hand.includes("rock") ||
+            gameState.player2.hand.includes("scissors") ||
+            gameState.player2.hand.includes("paper"))
+        ) {
+          if (
+            gameState.player2.hand.includes("pan") &&
+            !(gameState.player2.health < 4 && deck[deck.length - 1] === "pan")
+          ) {
+            let indexOfFusionCard1 = gameState.player2.hand.indexOf("pan");
 
-      //     switch (lastPlayedCard) {
-      //       case "rock":
-      //         counterCard = "paper";
-      //         break;
+            function getCard2Index(hand) {
+              let index;
+              index = Math.floor(Math.random() * hand.length);
+              if (hand[index] === "pan" || hand[index] === "shoot") {
+                index = getCard2Index(hand);
+              }
+              return index;
+            }
+            let indexOfFusionCard2 = getCard2Index(gameState.player2.hand);
+            // console.log(hand[indexOfFusionCard1], hand[indexOfFusionCard2]);
 
-      //       case "paper":
-      //         counterCard = "scissors";
-      //         break;
+            startFusion(
+              gameState.player2.hand[indexOfFusionCard1],
+              indexOfFusionCard1,
+              2
+            );
 
-      //       case "scissors":
-      //         counterCard = "rock";
-      //         break;
+            endFusion(
+              gameState.player2.hand[indexOfFusionCard2],
+              indexOfFusionCard2,
+              2
+            );
+          } else if (
+            gameState.player2.hand.includes("shoot") &&
+            gameState.player2.deck[gameState.player2.deck.length - 1] !== "shoot"
+          ) {
+            let indexOfFusionCard1 = hand.indexOf("shoot");
 
-      //       default:
-      //         counterCard = hand[Math.floor(Math.random() * hand.length)];
-      //         break;
-      //     }
+            function getCard2Index(hand) {
+              let index;
+              index = Math.floor(Math.random() * hand.length);
+              if (hand[index] === "pan" || hand[index] === "shoot") {
+                index = getCard2Index(hand);
+              }
+              return index;
+            }
+            let indexOfFusionCard2 = getCard2Index(gameState.player2.hand);
+            // console.log(hand[indexOfFusionCard1], hand[indexOfFusionCard2]);
 
-      //     let indexOfCardToSelect = hand.indexOf(counterCard);
-      //     handleCardSelection(2, indexOfCardToSelect);
-      //   }
+            startFusion(
+              gameState.player2.hand[indexOfFusionCard1],
+              indexOfFusionCard1,
+              2
+            );
 
-      //   function calculateProb() {
-      //     const totalCards = 6;
-      //     const remainingCards = totalCards - opponentDiscard.length;
+            endFusion(
+              gameState.player2.hand[indexOfFusionCard2],
+              indexOfFusionCard2,
+              2
+            );
+          }
 
-      //     const cardCounts = {
-      //       rock: 2,
-      //       paper: 2,
-      //       scissors: 2,
-      //     };
+          setTimeout(() => chooseBasedOnProb(), 500);
+        } else {
+          chooseBasedOnProb();
+        }
 
-      //     opponentDiscard.forEach((card) => {
-      //       cardCounts[card] -= 1;
-      //     });
+        if (gameState.player2.hand.includes("dinner")) {
+          let dinnerIndex = gameState.player2.hand.indexOf("dinner");
+          handleCardEffect(2, "dinner", dinnerIndex);
+        }
 
-      //     const cardProbabilities = {
-      //       rock: cardCounts.rock / remainingCards,
-      //       paper: cardCounts.paper / remainingCards,
-      //       scissors: cardCounts.scissors / remainingCards,
-      //     };
+        // Choose the card with the highest winning probability
+      }
 
-      //     return cardProbabilities;
-      //   }
+      function chooseBasedOnProb() {
+        const cardProbabilities = calculateProb();
+        const { rock, paper, scissors, pan, shoot } = cardProbabilities;
+
+        // Find the card with the highest winning probability
+        const winningProbabilities = {
+          rock: scissors, // Rock beats Scissors
+          paper: rock, // Paper beats Rock
+          scissors: paper, // Scissors beat Paper
+          shoot: scissors + rock + paper, // Shoot beats all basic cards
+          rockpan: 2 * scissors + rock + paper + 2 * shoot + pan, // basic+pan ties with rifle & beats the rest
+          paperpan: scissors + 2 * rock + paper + 2 * shoot + pan, // basic+pan ties with rifle & beats the rest
+          scissorspan: scissors + rock + 2 * paper + 2 * shoot + pan, // basic+pan ties with Rifle & beats the rest
+          rockshoot: scissors + rock + paper + shoot + pan, // basic+shoot beats the rest
+          papershoot: scissors + rock + paper + shoot + pan, // basic+shoot beats the rest
+          scissorsshoot: scissors + rock + paper + shoot + pan, // basic+shoot beats the rest
+          rifle: 2 * (scissors + rock + paper + shoot) + pan, // rifle ties with basic+pan & beats the rest
+        };
+
+        // Choose the card with the highest winning probability
+        let bestCard =
+          gameState.player2.hand[Math.floor(Math.random() * hand.length)];
+        if (bestCard === "pan" || bestCard === "dinner") {
+          chooseBasedOnProb();
+        } else {
+          let bestCardProbability = winningProbabilities[bestCard];
+
+          for (const [card, probability] of Object.entries(
+            winningProbabilities
+          )) {
+            if (
+              probability > bestCardProbability &&
+              gameState.player2.hand.includes(card)
+            ) {
+              bestCard = `${card}`;
+              bestCardProbability = probability;
+            }
+          }
+          console.log(bestCard, bestCardProbability);
+
+          let indexOfCardToSelect = gameState.player2.hand.indexOf(bestCard);
+          handleCardSelection(2, indexOfCardToSelect);
+        }
+      }
+
+      function counterStrategy() {
+        // AI Fusion logic
+
+        if (cardsCounter(gameState.player2.hand).pan > 1 && gameState.player2.health < 4) {
+          let fusionCard1Index = gameState.player2.hand.indexOf("pan");
+          function getCard2Index(hand) {
+            let index = hand.findIndex(
+              (card, i) => card === "pan" && i !== fusionCard1Index
+            );
+            return index;
+          }
+          let fusionCard2Index = getCard2Index(gameState.player2.hand);
+          startFusion(
+            gameState.player2.hand[fusionCard1Index],
+            fusionCard1Index,
+            2
+          );
+          endFusion(
+            gameState.player2.hand[fusionCard2Index],
+            fusionCard2Index,
+            2
+          );
+
+          console.log(
+            fusionCard1Index,
+            hand[fusionCard1Index],
+            fusionCard2Index,
+            hand[fusionCard2Index]
+          );
+
+          setTimeout(() => chooseBasedOnCounter(), 500);
+        } else if (cardsCounter(gameState.player2.hand).shoot > 1) {
+          let fusionCard1Index = gameState.player2.hand.indexOf("shoot");
+          function getCard2Index(hand) {
+            let index = hand.findIndex(
+              (card, i) => card === "shoot" && i !== fusionCard1Index
+            );
+            return index;
+          }
+          let fusionCard2Index = getCard2Index(gameState.player2.hand);
+          startFusion(
+            gameState.player2.hand[fusionCard1Index],
+            fusionCard1Index,
+            2
+          );
+          endFusion(
+            gameState.player2.hand[fusionCard2Index],
+            fusionCard2Index,
+            2
+          );
+
+          setTimeout(() => chooseBasedOnCounter(), 500);
+        } else if (
+          (gameState.player2.hand.includes("pan") || gameState.player2.hand.includes("shoot")) &&
+          (gameState.player2.hand.includes("rock") ||
+            gameState.player2.hand.includes("scissors") ||
+            gameState.player2.hand.includes("paper"))
+        ) {
+          if (
+            hand.includes("pan") &&
+            !(gameState.player2.health < 4 && gameState.player2.deck[gameState.player2.deck.length - 1] === "pan")
+          ) {
+            let indexOfFusionCard1 = gameState.player2.hand.indexOf("pan");
+
+            function getCard2Index(hand) {
+              let index;
+              index = Math.floor(Math.random() * hand.length);
+              if (hand[index] === "pan" || hand[index] === "shoot") {
+                index = getCard2Index(hand);
+              }
+              return index;
+            }
+            let indexOfFusionCard2 = getCard2Index(gameState.player2.hand);
+            // console.log(hand[indexOfFusionCard1], hand[indexOfFusionCard2]);
+
+            startFusion(
+              gameState.player2.hand[indexOfFusionCard1],
+              indexOfFusionCard1,
+              2
+            );
+
+            endFusion(
+              gameState.player2.hand[indexOfFusionCard2],
+              indexOfFusionCard2,
+              2
+            );
+          } else if (
+            gameState.player2.hand.includes("shoot") &&
+            gameState.player2.deck[gameState.player2.deck.length - 1] !== "shoot"
+          ) {
+            let indexOfFusionCard1 = gameState.player2.hand.indexOf("shoot");
+
+            function getCard2Index(hand) {
+              let index;
+              index = Math.floor(Math.random() * hand.length);
+              if (hand[index] === "pan" || hand[index] === "shoot") {
+                index = getCard2Index(hand);
+              }
+              return index;
+            }
+            let indexOfFusionCard2 = getCard2Index(gameState.player2.hand);
+            // console.log(hand[indexOfFusionCard1], hand[indexOfFusionCard2]);
+
+            startFusion(
+              gameState.player2.hand[indexOfFusionCard1],
+              indexOfFusionCard1,
+              2
+            );
+
+            endFusion(
+              gameState.player2.hand[indexOfFusionCard2],
+              indexOfFusionCard2,
+              2
+            );
+          }
+
+          setTimeout(() => chooseBasedOnCounter(), 500);
+        } else {
+          chooseBasedOnCounter();
+        }
+      }
+
+      function chooseBasedOnCounter() {
+        const lastPlayedCard = opponentDiscard[opponentDiscard.length - 1];
+        let counterCard;
+        if (lastPlayedCard) {
+          switch (lastPlayedCard) {
+            case "rock":
+              counterCard = "paper";
+              break;
+
+            case "paper":
+              counterCard = "scissors";
+              break;
+
+            case "scissors":
+              counterCard = "rock";
+              break;
+
+            case "pan":
+              counterCard = "shoot";
+              break;
+
+            case "shoot":
+              counterCard =
+                "rockshoot" ||
+                "papershoot" ||
+                "scissorsshoot" ||
+                "rockpan" ||
+                "paperpan" ||
+                "scissorspan" ||
+                "rifle";
+              break;
+
+            case lastPlayedCard.includes("pan") && lastPlayedCard.length > 3:
+              switch (lastPlayedCard) {
+                case "rockpan":
+                  counterCard = "paperpan";
+                  break;
+                case "scissorspan":
+                  counterCard = "rockpan";
+                  break;
+                case "paperpan":
+                  counterCard = "scissorspan";
+                  break;
+
+                default:
+                  counterCard = "rifle";
+                  break;
+              }
+              break;
+
+            case lastPlayedCard.includes("shoot") && lastPlayedCard.length > 5:
+              switch (lastPlayedCard) {
+                case "rockshoot":
+                  counterCard = "scissorsshoot" || "scissorspan";
+                  break;
+                case "papershoot":
+                  counterCard = "rockshoot" || "rockpan";
+                  break;
+                case "scissorsshoot":
+                  counterCard = "papershoot" || "paperpan";
+                  break;
+
+                default:
+                  counterCard = "rifle";
+                  break;
+              }
+              break;
+
+            default:
+              counterCard = gameState.player2.hand[Math.floor(Math.random() * gameState.player2.hand.length)];
+              break;
+          }
+
+          let indexOfCardToSelect = gameState.player2.hand.indexOf(counterCard);
+          if (gameState.player2.hand.includes(counterCard)) {
+            handleCardSelection(2, indexOfCardToSelect);
+          } else {
+            selectRandomCard();
+          }
+        } else {
+          selectRandomCard();
+        }
+      }
+      function calculateProb() {
+        const totalCards = 10;
+        const remainingCards = totalCards - gameState.player1.discard.length;
+
+        const cardCounts = {
+          rock: 2,
+          paper: 2,
+          scissors: 2,
+          pan: cardsCounter(initialAIPowerCards)["pan"],
+          shoot: cardsCounter(initialAIPowerCards)["shoot"],
+        };
+
+        opponentDiscard.forEach((card) => {
+          if (card.includes("shoot") && card.length > 5) {
+            cardCounts["shoot"] -= 1;
+            cardCounts[card.slice(0, -5)] -= 1;
+          } else if (card.includes("pan") && card.length > 3) {
+            cardCounts["pan"] -= 1;
+            cardCounts[card.slice(0, -3)] -= 1;
+          } else {
+            cardCounts[card] -= 1;
+          }
+        });
+
+        const cardProbabilities = {
+          rock: cardCounts.rock / remainingCards,
+          paper: cardCounts.paper / remainingCards,
+          scissors: cardCounts.scissors / remainingCards,
+          pan: cardCounts.pan / remainingCards,
+          shoot: cardCounts.shoot / remainingCards,
+        };
+
+        return cardProbabilities;
+      }
     }, [round]);
   }
 
