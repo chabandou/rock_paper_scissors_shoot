@@ -649,13 +649,15 @@ export default function Home() {
             className="object-contain absolute top-0 left-0 z-0"
           />
           <div className="">
-            <button
-              className="btn btn-outline absolute top-1/2 -translate-y-1/2 right-[15px]"
-              onClick={() => passTurn()}
-              disabled={passedTurn}
-            >
-              Pass turn
-            </button>
+            <div className="absolute top-1/2 -translate-y-1/2 right-[15px]">
+              <button
+                className="btn btn-neutral"
+                onClick={() => passTurn()}
+                disabled={passedTurn}
+              >
+                Pass turn
+              </button>
+            </div>
             <Player
               player={1}
               gameState={gameState}
