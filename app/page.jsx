@@ -8,6 +8,7 @@ import { cardsCounter, shuffle } from "@/libs/utils";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { CARDS } from "@/libs/cards";
+import Card from "@/components/animata/Card";
 
 export default function Home() {
   const [panUsed, setPanUsed] = useState(null);
@@ -15,6 +16,8 @@ export default function Home() {
   const [initialAIPowerCards, setInitialAIPowerCards] = useState([]);
 
   const [gameWinner, setGameWinner] = useState("");
+
+  const [revealed, setRevealed] = useState(false);
 
   /// Power Cards logic
 
@@ -141,49 +144,62 @@ export default function Home() {
         gameState.player1.hand.includes("pan") &&
         gameState.player1.activeCard !== "pan"
       ) {
-        handlePanCounter(1);
+        setRevealed(true);
+        setTimeout(() => handlePanCounter(1), 3000);
+
       } else if (
         player1Card === "shoot" &&
         gameState.player2.hand.includes("pan")
       ) {
-        handlePanCounter(2);
+        setRevealed(true);
+        setTimeout(() => handlePanCounter(2), 3000);
+
       } else {
-        playRound(player1Card, player2Card);
+        setRevealed(true);
+        setTimeout(() => playRound(player1Card, player2Card), 3000);
       }
     }
     if (player1Card && !player2Card) {
       setTimeout(() => {
-        matchLog.push(
-          "Round " + gameState.round + ": " + player1Card + " vs. Player 2 Pass"
-        );
-        setMatchLog(matchLog);
-
-        let newGameState = { ...gameState };
-
-        if (player1Card === "rifle") {
-          newGameState.player2.health -= 3;
-        } else if (player1Card.includes("shoot") && player1Card.length > 5) {
-          newGameState.player2.health -= 2;
-        } else {
-          newGameState.player2.health -= 1;
-        }
-        setRoundWinner("player 1");
-
-        newGameState.round += 1;
-
-        // Remove the cards from the active cards
-        newGameState.player1.activeCard = null;
-
-        // Add the cards to the discard pile
-        newGameState.player1.discard.push(player1Card);
-
-        drawCard("player1");
-        drawCard("player2");
-
+        setRevealed(true);
         setTimeout(() => {
-          setGameState(newGameState);
-          setRoundWinner(null);
-        }, 1500);
+          matchLog.push(
+            "Round " +
+              gameState.round +
+              ": " +
+              player1Card +
+              " vs. Player 2 Pass"
+          );
+          setMatchLog(matchLog);
+
+          // let newGameState = { ...gameState };
+
+          if (player1Card === "rifle") {
+            gameState.player2.health -= 3;
+          } else if (player1Card.includes("shoot") && player1Card.length > 5) {
+            gameState.player2.health -= 2;
+          } else {
+            gameState.player2.health -= 1;
+          }
+          setRoundWinner("player 1");
+
+          gameState.round += 1;
+
+          // Remove the cards from the active cards
+          gameState.player1.activeCard = null;
+
+          // Add the cards to the discard pile
+          gameState.player1.discard.push(player1Card);
+
+          drawCard("player1");
+          drawCard("player2");
+
+          setTimeout(() => {
+            setGameState({...gameState});
+            setRoundWinner(null);
+            setRevealed(false);
+          }, 1500);
+        }, 1000);
       }, 3000);
     }
   }, [gameState.player1.activeCard, gameState.player2.activeCard]);
@@ -390,6 +406,7 @@ export default function Home() {
     setTimeout(() => {
       setGameState(newGameState);
       setRoundWinner(null);
+      setRevealed(false);
     }, 1500);
     // console.log(
     //   "player1 hand",
@@ -434,10 +451,10 @@ export default function Home() {
 
   async function endFusion(e, index, player) {
     console.log("endFusion TRIGGERED ****************");
-
+    // console.log(e?.target.alt);
     let card2 =
       player === 1
-        ? { card: e.target.innerText, index: index }
+        ? { card: e?.target.alt, index: index }
         : { card: e, index: index };
     const card1 =
       player === 1 ? fusionMaterial.player1 : fusionMaterial.player2;
@@ -570,54 +587,62 @@ export default function Home() {
   function passTurn() {
     setPassedTurn(true);
     let newGameState = { ...gameState };
-
-    if (gameState.player2.activeCard) {
-      matchLog.push(
-        "Round " +
-          gameState.round +
-          ": Player 1 Pass" +
-          " vs." +
-          gameState.player2.activeCard
-      );
-      setMatchLog(matchLog);
-
-      if (gameState.player2.activeCard === "rifle") {
-        newGameState.player1.health -= 3;
-      } else if (
-        gameState.player2.activeCard.includes("shoot") &&
-        gameState.player2.activeCard.length > 5
-      ) {
-        newGameState.player1.health -= 2;
-      } else {
-        newGameState.player1.health -= 1;
-      }
-      setRoundWinner("player 2");
-
-      // Add the cards to the discard pile
-      newGameState.player2.discard.push(gameState.player2.activeCard);
-
-      // Remove the cards from the active cards
-      newGameState.player2.activeCard = null;
-    } else if (!gameState.player2.activeCard) {
-      matchLog.push(
-        "Round " + gameState.round + ": Player 1 Pass vs.Player 2 Pass"
-      );
-
-      setMatchLog(matchLog);
-
-      setRoundWinner("It's a tie!");
-    }
-
-    newGameState.round += 1;
-
-    drawCard("player1");
-    drawCard("player2");
     setTimeout(() => {
-      setGameState(newGameState);
-      setRoundWinner(null);
-      setPassedTurn(false);
-    }, 1500);
+      if (gameState.player2.activeCard) {
+        matchLog.push(
+          "Round " +
+            gameState.round +
+            ": Player 1 Pass" +
+            " vs." +
+            gameState.player2.activeCard
+        );
+        setMatchLog(matchLog);
+
+        if (gameState.player2.activeCard === "rifle") {
+          newGameState.player1.health -= 3;
+        } else if (
+          gameState.player2.activeCard.includes("shoot") &&
+          gameState.player2.activeCard.length > 5
+        ) {
+          newGameState.player1.health -= 2;
+        } else {
+          newGameState.player1.health -= 1;
+        }
+        setRoundWinner("player 2");
+
+        // Add the cards to the discard pile
+        newGameState.player2.discard.push(gameState.player2.activeCard);
+
+        // Remove the cards from the active cards
+        newGameState.player2.activeCard = null;
+      } else if (!gameState.player2.activeCard) {
+        matchLog.push(
+          "Round " + gameState.round + ": Player 1 Pass vs.Player 2 Pass"
+        );
+
+        setMatchLog(matchLog);
+
+        setRoundWinner("It's a tie!");
+      }
+
+      newGameState.round += 1;
+
+      drawCard("player1");
+      drawCard("player2");
+      setTimeout(() => {
+        setGameState(newGameState);
+        setRoundWinner(null);
+        setPassedTurn(false);
+        setRevealed(false);
+      }, 1500);
+    }, 3000);
   }
+
+  useEffect(() => {
+    if (passedTurn) {
+    setRevealed(true);
+    }
+  }, [passedTurn]);
 
   return (
     <main className="flex min-h-screen items-center justify-center p-6">
@@ -641,18 +666,18 @@ export default function Home() {
           <h1 className="text-5xl font-bold">Rock, Paper, Scissors, Shoot!</h1>
           <h2 className="text-3xl font-bold">Round {gameState.round}</h2>
         </div>
-        <section className="field relative w-[70vw] aspect-[1.54/1] border-4 border-white/80">
+        <section className="field relative w-[70vw] aspect-[1.54/1] border-4 border-white/80 overflow-hidden">
           <Image
             src="/field.svg"
             alt="field"
             fill
-            className="object-contain absolute top-0 left-0 z-0"
+            className="object-contain absolute top-0 left-0 z-0 "
           />
           <div className="">
             <div className="absolute top-1/2 -translate-y-1/2 right-[15px]">
               <button
                 className="btn btn-neutral"
-                onClick={() => passTurn()}
+                onClick={() => (passTurn())}
                 disabled={passedTurn}
               >
                 Pass turn
@@ -671,6 +696,7 @@ export default function Home() {
               setFusionState={setFusionState}
               fusionMaterial={fusionMaterial}
               setFusionMaterial={setFusionMaterial}
+              revealed={revealed}
             />
             <Player
               player={2}
@@ -687,9 +713,11 @@ export default function Home() {
               setFusionMaterial={setFusionMaterial}
               initialAIPowerCards={initialAIPowerCards}
               setInitialAIPowerCards={setInitialAIPowerCards}
+              revealed={revealed}
             />
           </div>
         </section>
+
         <EndGameModal
           gameState={gameState}
           setGameState={setGameState}

@@ -1,6 +1,8 @@
 import { cardsCounter } from "@/libs/utils";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
+import Card from "./animata/Card";
+import Image from "next/image";
 
 export default function Player({
   player,
@@ -17,6 +19,7 @@ export default function Player({
   fusionMaterial,
   setFusionMaterial,
   initialAIPowerCards,
+  revealed,
 }) {
   let {
     hand,
@@ -63,29 +66,29 @@ export default function Player({
       // If AI has cards, AI will calculate the probability of remaining opponent cards
       if (hand.length > 0 && !activeCard) {
         setTimeout(() => {
-            switchStrategy();
-            switch (currentStrategy) {
-              case "random":
-                return randomStrategy(hand);
-              case "counter":
-                return counterStrategy();
-              case "probability":
-                return probabilityStrategy();
-              default:
-                return probabilityStrategy();
-            }
+          switchStrategy();
+          switch (currentStrategy) {
+            case "random":
+              return randomStrategy(hand);
+            case "counter":
+              return counterStrategy();
+            case "probability":
+              return probabilityStrategy();
+            default:
+              return probabilityStrategy();
+          }
         }, 2000);
       }
 
       // AI strategy functions
       function randomStrategy(hand) {
-
         // Power Card + Basic Card AI Fusion
 
         let randomNum = Number(Math.random());
 
         if (
-          (gameState.player2.hand.includes("pan") || gameState.player2.hand.includes("shoot")) &&
+          (gameState.player2.hand.includes("pan") ||
+            gameState.player2.hand.includes("shoot")) &&
           (gameState.player2.hand.includes("rock") ||
             gameState.player2.hand.includes("scissors") ||
             gameState.player2.hand.includes("paper")) &&
@@ -111,10 +114,17 @@ export default function Player({
           //   card: hand[indexOfFusionCard2],
           //   index: indexOfFusionCard2,
           // };
-          endFusion(gameState.player2.hand[indexOfFusionCard2], indexOfFusionCard2, 2);
+          endFusion(
+            gameState.player2.hand[indexOfFusionCard2],
+            indexOfFusionCard2,
+            2
+          );
 
           setTimeout(() => selectRandomCard(), 500);
-        } else if (cardsCounter(gameState.player2.hand).pan > 1 && randomNum <= 0.5) {
+        } else if (
+          cardsCounter(gameState.player2.hand).pan > 1 &&
+          randomNum <= 0.5
+        ) {
           let fusionCard1Index = gameState.player2.hand.indexOf("pan");
           function getCard2Index(hand) {
             let index = hand.findIndex(
@@ -123,8 +133,16 @@ export default function Player({
             return index;
           }
           let fusionCard2Index = getCard2Index(gameState.player2.hand);
-          startFusion(gameState.player2.hand[fusionCard1Index], fusionCard1Index, 2);
-          endFusion(gameState.player2.hand[fusionCard2Index], fusionCard2Index, 2);
+          startFusion(
+            gameState.player2.hand[fusionCard1Index],
+            fusionCard1Index,
+            2
+          );
+          endFusion(
+            gameState.player2.hand[fusionCard2Index],
+            fusionCard2Index,
+            2
+          );
 
           console.log(
             fusionCard1Index,
@@ -134,7 +152,10 @@ export default function Player({
           );
 
           setTimeout(() => selectRandomCard(), 500);
-        } else if (cardsCounter(gameState.player2.hand).shoot > 1 && randomNum <= 0.5) {
+        } else if (
+          cardsCounter(gameState.player2.hand).shoot > 1 &&
+          randomNum <= 0.5
+        ) {
           let fusionCard1Index = gameState.player2.hand.indexOf("shoot");
           function getCard2Index(hand) {
             let index = hand.findIndex(
@@ -143,12 +164,22 @@ export default function Player({
             return index;
           }
           let fusionCard2Index = getCard2Index(gameState.player2.hand);
-          startFusion(gameState.player2.hand[fusionCard1Index], fusionCard1Index, 2);
-          endFusion(gameState.player2.hand[fusionCard2Index], fusionCard2Index, 2);
+          startFusion(
+            gameState.player2.hand[fusionCard1Index],
+            fusionCard1Index,
+            2
+          );
+          endFusion(
+            gameState.player2.hand[fusionCard2Index],
+            fusionCard2Index,
+            2
+          );
 
           setTimeout(() => selectRandomCard(), 500);
         } else {
-          let indexOfCardToSelect = Math.floor(Math.random() * gameState.player2.hand.length);
+          let indexOfCardToSelect = Math.floor(
+            Math.random() * gameState.player2.hand.length
+          );
           if (gameState.player2.hand[indexOfCardToSelect] !== "pan") {
             handleCardSelection(2, indexOfCardToSelect);
           } else {
@@ -213,7 +244,10 @@ export default function Player({
       function probabilityStrategy() {
         // AI Fusion logic
 
-        if (cardsCounter(gameState.player2.hand).pan > 1 && gameState.player2.health < 4) {
+        if (
+          cardsCounter(gameState.player2.hand).pan > 1 &&
+          gameState.player2.health < 4
+        ) {
           let fusionCard1Index = gameState.player2.hand.indexOf("pan");
           function getCard2Index(hand) {
             let index = hand.findIndex(
@@ -263,7 +297,8 @@ export default function Player({
 
           setTimeout(() => chooseBasedOnProb(), 500);
         } else if (
-          (gameState.player2.hand.includes("pan") || gameState.player2.hand.includes("shoot")) &&
+          (gameState.player2.hand.includes("pan") ||
+            gameState.player2.hand.includes("shoot")) &&
           (gameState.player2.hand.includes("rock") ||
             gameState.player2.hand.includes("scissors") ||
             gameState.player2.hand.includes("paper"))
@@ -298,7 +333,8 @@ export default function Player({
             );
           } else if (
             gameState.player2.hand.includes("shoot") &&
-            gameState.player2.deck[gameState.player2.deck.length - 1] !== "shoot"
+            gameState.player2.deck[gameState.player2.deck.length - 1] !==
+              "shoot"
           ) {
             let indexOfFusionCard1 = hand.indexOf("shoot");
 
@@ -387,7 +423,10 @@ export default function Player({
       function counterStrategy() {
         // AI Fusion logic
 
-        if (cardsCounter(gameState.player2.hand).pan > 1 && gameState.player2.health < 4) {
+        if (
+          cardsCounter(gameState.player2.hand).pan > 1 &&
+          gameState.player2.health < 4
+        ) {
           let fusionCard1Index = gameState.player2.hand.indexOf("pan");
           function getCard2Index(hand) {
             let index = hand.findIndex(
@@ -437,14 +476,19 @@ export default function Player({
 
           setTimeout(() => chooseBasedOnCounter(), 500);
         } else if (
-          (gameState.player2.hand.includes("pan") || gameState.player2.hand.includes("shoot")) &&
+          (gameState.player2.hand.includes("pan") ||
+            gameState.player2.hand.includes("shoot")) &&
           (gameState.player2.hand.includes("rock") ||
             gameState.player2.hand.includes("scissors") ||
             gameState.player2.hand.includes("paper"))
         ) {
           if (
             hand.includes("pan") &&
-            !(gameState.player2.health < 4 && gameState.player2.deck[gameState.player2.deck.length - 1] === "pan")
+            !(
+              gameState.player2.health < 4 &&
+              gameState.player2.deck[gameState.player2.deck.length - 1] ===
+                "pan"
+            )
           ) {
             let indexOfFusionCard1 = gameState.player2.hand.indexOf("pan");
 
@@ -472,7 +516,8 @@ export default function Player({
             );
           } else if (
             gameState.player2.hand.includes("shoot") &&
-            gameState.player2.deck[gameState.player2.deck.length - 1] !== "shoot"
+            gameState.player2.deck[gameState.player2.deck.length - 1] !==
+              "shoot"
           ) {
             let indexOfFusionCard1 = gameState.player2.hand.indexOf("shoot");
 
@@ -575,7 +620,10 @@ export default function Player({
               break;
 
             default:
-              counterCard = gameState.player2.hand[Math.floor(Math.random() * gameState.player2.hand.length)];
+              counterCard =
+                gameState.player2.hand[
+                  Math.floor(Math.random() * gameState.player2.hand.length)
+                ];
               break;
           }
 
@@ -627,32 +675,66 @@ export default function Player({
   }
 
   // const cardRefs = hand.map((_, i) => useRef());
-
+  let deckSrc =
+    deck.length >= 3
+      ? "/card-deck.svg"
+      : deck.length === 2
+      ? "/card-deck-only2.svg"
+      : "/card-back.svg";
   return (
     <>
       <div
         className={clsx(
-          "activeCard absolute top-1/2 translate-y-[-50%] translate-x-[-50%] border-2 border-red-300",
+          "activeCard absolute top-1/2 translate-y-[-50%] -translate-x-1/2 border-2 border-red-300 z-0",
           {
-            "right-[30%]": player === 2,
-            "left-1/3": player === 1,
+            "left-[calc(50%+calc(10vw*0.74))]": player === 2,
+            "left-[calc(50%-calc(10vw*0.74))]": player === 1,
           }
         )}
       >
-        {activeCard}
+        {player === 1
+          ? gameState.player1.activeCard && (
+              <Card
+                name={activeCard}
+                position={"activeCard"}
+                revealed={revealed}
+              />
+            )
+          : gameState.player2.activeCard && (
+              <Card
+                name={activeCard}
+                position={"activeCard"}
+                revealed={revealed}
+              />
+            )}
       </div>
 
       <div
-        className={clsx("deck absolute right-0", {
-          "top-0": player === 2,
-          "bottom-0": player === 1,
-        })}
+        className={clsx(
+          "deck absolute aspect-[2/3] right-[calc(0.7vw)]",
+          {
+            "top-[calc(0.7vw)]": player === 2,
+            "bottom-[calc(0.7vw)]": player === 1,
+            "aspect-[2.2/3] w-[9vw]": deckSrc === "/card-deck.svg",
+            "w-[7.6vw]": deckSrc !== "/card-deck.svg",
+          }
+        )}
       >
-        {deck.length}
+        {deck.length > 0 && (
+          <Image
+            src={deckSrc}
+            alt="card-back"
+            fill
+            className="object-contain absolute top-0 left-0 z-0 "
+          />
+        )}
+        <span className={clsx("absolute top-1/2 -translate-y-1/2 left-1/2 ", {
+          "-translate-x-1/2": deckSrc !== "/card-deck.svg",
+        })}>{deck.length}</span>
       </div>
       <div
         className={clsx(
-          "absolute player left-1/2 translate-x-[-50%] flex items-center justify-center",
+          "absolute player left-1/2 translate-x-[-50%] flex items-center justify-center z-10",
           {
             "top-0": player === 2,
             "bottom-0": player === 1,
@@ -664,7 +746,7 @@ export default function Player({
             <div
               key={index}
               //   ref={cardRefs[index]}
-              className={clsx("card", {
+              className={clsx("z-50", {
                 "cursor-pointer": card !== "pan",
               })}
             >
@@ -697,12 +779,17 @@ export default function Player({
         {health}
       </div>
       <div
-        className={clsx("playerDiscard absolute left-0", {
-          "top-0": player === 2,
-          "bottom-0": player === 1,
+        className={clsx("playerDiscard absolute w-[7.6vw] aspect-[2/3] left-[calc(0.7vw)]", {
+          "top-[calc(0.7vw)]": player === 2,
+          "top-[calc(100%-0.7vw-11.25vw)]": player === 1,
         })}
       >
-        {playerDiscard.length}
+        <span className={clsx("absolute top-1 left-2 z-10")}>{playerDiscard.length}</span>
+
+        {playerDiscard.map((card, i) => {
+          return <Card name={card} position={"discard"} revealed={true} />;
+        })}
+        
       </div>
     </>
   );
@@ -725,21 +812,27 @@ function Dropdown({
   endFusion,
 }) {
   return (
-    <div className="dropdown dropdown-top dropdown-hover">
+    <div
+      className={clsx(
+        " dropdown dropdown-top dropdown-hover transition-all duration-300 ease-in-out z-50",
+        {
+          "translate-y-1/2 hover:translate-y-1/4": player === 1,
+          "-translate-y-1/2 hover:-translate-y-1/4": player === 2,
+        }
+      )}
+    >
       <div
-        tabIndex={0}
         role="button"
-        className="btn m-1"
         onClick={(e) => {
-          fusionState.player1 && endFusion(e, index, player);
+          endFusion(e, index, player);
         }}
       >
-        {card}
+        <Card name={card} revealed={player === 1 && true} position={"hand"} />
       </div>
       <ul
         tabIndex={0}
         className={clsx(
-          "dropdown-content menu bg-base-100 rounded-box z-[1] w-auto p-2 shadow",
+          "dropdown-content menu bg-base-100 rounded-box w-auto p-2 shadow z-50",
           {
             hidden: fusionState.player1,
           }
