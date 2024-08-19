@@ -1,3 +1,5 @@
+const { transform } = require('next/dist/build/swc');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -12,17 +14,25 @@ module.exports = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      animation: {
+        'played': 'played 0.5s ease-out forwards',
+      },
+      keyframes: {
+        played: {
+          '100%': { top: '50%',  transform: ' scale(1)',  },
+        }
+      }
     },
   },
   daisyui: {
     themes: [
       {
         mytheme: {
-          "primary": "#0079ff",
+          "primary": "#0c4a6e",
 
-          "secondary": "#00b2ff",
+          "secondary": "#9a3412",
 
-          "accent": "#00ff8e",
+          "accent": "#065f46",
 
           "neutral": "#181818",
 

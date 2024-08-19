@@ -1,19 +1,23 @@
+import { ubuntu } from "@/app/font";
 import { fusionCards } from "@/libs/cards";
 import clsx from "clsx";
 import Image from "next/image";
 
-export default function Card({ name, position, revealed }) {
+export default function Card({ name, position, revealed, index }) {
   console.log(revealed);
+
+  const rotationClasses = ["group-hover:rotate-15", " group-hover:rotate-30", " group-hover:rotate-45"];
 
   return (
     <div
+
       className={clsx(
-        "group  aspect-[2/3] [prespective:1000px] transition-all duration-500 ease-in-out",
+        "w-[7.6vw] aspect-[2/3] [prespective:1000px] transition-all duration-500 ease-in-out flex-shrink-0 origin-bottom",
         {
-          "w-[7.6vw]": position !== "hand",
-          "absolute ": position === "discard",
-          "w-[10vw]": position === "hand",
-        }
+          "absolute": position === "discard",
+          "drawAnim ": position === "hand",
+        },
+        position === "discard" && rotationClasses[index % 3]
       )}
     >
       <div
@@ -32,9 +36,13 @@ export default function Card({ name, position, revealed }) {
             fill
             className="object-contain absolute top-0 left-0 z-10"
           />
-          <div className="absolute top-[64%] left-1/2 -translate-x-1/2 z-20 capitalize w-full text-center">
+          <div className={clsx("absolute top-[66%] left-1/2 -translate-x-1/2 z-20 capitalize w-full text-center", 
+          {
+            "top-[64%]": position === "hand",
+          }
+          )}>
             <h2
-              className={clsx(
+              className={clsx(ubuntu.className,
                 "text-[1.34vw] w-full font-bold text-transparent bg-gradient-to-t bg-clip-text",
                 {
                   "from-gray-500 to-white": name !== "shoot" && name !== "pan" && !name.includes("shoot") && !name.includes("pan"),

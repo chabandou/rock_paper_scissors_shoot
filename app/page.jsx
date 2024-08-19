@@ -9,6 +9,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { CARDS } from "@/libs/cards";
 import Card from "@/components/animata/Card";
+import { ubuntu } from "./font";
+import clsx from "clsx";
 
 export default function Home() {
   const [panUsed, setPanUsed] = useState(null);
@@ -645,7 +647,7 @@ export default function Home() {
   }, [passedTurn]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-6">
+    <main className="flex min-h-screen items-center justify-center bg-primary/25 p-6">
       <div className="z-10 w-full max-w-5xl items-center justify-between lg:flex flex-col">
         <Modal
           selectedPowerCards={selectedPowerCards}
@@ -663,10 +665,10 @@ export default function Home() {
           setGameState={setGameState}
         />
         <div>
-          <h1 className="text-5xl font-bold">Rock, Paper, Scissors, Shoot!</h1>
+          <h1 className={clsx(ubuntu.className, "text-5xl font-bold")}>Rock, Paper, Scissors, Shoot!</h1>
           <h2 className="text-3xl font-bold">Round {gameState.round}</h2>
         </div>
-        <section className="field relative w-[70vw] aspect-[1.54/1] border-4 border-white/80 overflow-hidden">
+        <section className="field relative w-[70vw] aspect-[1.54/1] border-4 border-white/80 overflow-hidden bg-black">
           <Image
             src="/field.svg"
             alt="field"
@@ -674,7 +676,7 @@ export default function Home() {
             className="object-contain absolute top-0 left-0 z-0 "
           />
           <div className="">
-            <div className="absolute top-1/2 -translate-y-1/2 right-[15px]">
+            <div className="absolute top-1/2 -translate-y-1/2 right-[15px] z-30">
               <button
                 className="btn btn-neutral"
                 onClick={() => (passTurn())}

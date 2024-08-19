@@ -3,6 +3,8 @@ import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import Card from "./animata/Card";
 import Image from "next/image";
+import { AnimatePresence, motion } from "framer-motion";
+import { ubuntu } from "@/app/font";
 
 export default function Player({
   player,
@@ -680,12 +682,12 @@ export default function Player({
       ? "/card-deck.svg"
       : deck.length === 2
       ? "/card-deck-only2.svg"
-      : "/card-back.svg";
+      : "/card-back2.svg";
   return (
     <>
       <div
         className={clsx(
-          "activeCard absolute top-1/2 translate-y-[-50%] -translate-x-1/2 border-2 border-red-300 z-0",
+          "activeCard absolute top-1/2 translate-y-[-50%] -translate-x-1/2 z-0",
           {
             "left-[calc(50%+calc(10vw*0.74))]": player === 2,
             "left-[calc(50%-calc(10vw*0.74))]": player === 1,
@@ -710,15 +712,12 @@ export default function Player({
       </div>
 
       <div
-        className={clsx(
-          "deck absolute aspect-[2/3] right-[calc(0.7vw)]",
-          {
-            "top-[calc(0.7vw)]": player === 2,
-            "bottom-[calc(0.7vw)]": player === 1,
-            "aspect-[2.2/3] w-[9vw]": deckSrc === "/card-deck.svg",
-            "w-[7.6vw]": deckSrc !== "/card-deck.svg",
-          }
-        )}
+        className={clsx("deck absolute aspect-[2/3] right-[calc(0.7vw)]", {
+          "top-[calc(0.7vw)]": player === 2,
+          "bottom-[calc(0.7vw)]": player === 1,
+          "aspect-[2.2/3] w-[9vw]": deckSrc === "/card-deck.svg",
+          "w-[7.6vw]": deckSrc !== "/card-deck.svg",
+        })}
       >
         {deck.length > 0 && (
           <Image
@@ -728,46 +727,52 @@ export default function Player({
             className="object-contain absolute top-0 left-0 z-0 "
           />
         )}
-        <span className={clsx("absolute top-1/2 -translate-y-1/2 left-1/2 ", {
-          "-translate-x-1/2": deckSrc !== "/card-deck.svg",
-        })}>{deck.length}</span>
+        <span
+          className={clsx("absolute top-1/2 -translate-y-1/2 left-1/2 ", {
+            "-translate-x-1/2": deckSrc !== "/card-deck.svg",
+          })}
+        >
+          {deck.length}
+        </span>
       </div>
       <div
         className={clsx(
-          "absolute player left-1/2 translate-x-[-50%] flex items-center justify-center z-10",
+          "absolute w-full h-full player left-1/2 translate-x-[-50%] flex items-center justify-center z-10",
           {
             "top-0": player === 2,
-            "bottom-0": player === 1,
+            "bottom-0 z-20": player === 1,
           }
         )}
       >
         <div className="hand flex items-center justify-center gap-2">
-          {hand.map((card, index) => (
-            <div
-              key={index}
-              //   ref={cardRefs[index]}
-              className={clsx("z-50", {
-                "cursor-pointer": card !== "pan",
-              })}
-            >
-              <Dropdown
-                card={card}
-                handleCardSelection={handleCardSelection}
-                player={player}
-                index={index}
-                hand={hand}
-                fusionState={fusionState}
-                setFusionState={setFusionState}
-                fusionMaterial={fusionMaterial}
-                setFusionMaterial={setFusionMaterial}
-                handleCardEffect={handleCardEffect}
-                setGameState={setGameState}
-                gameState={gameState}
-                startFusion={startFusion}
-                endFusion={endFusion}
-              />
-            </div>
-          ))}
+          <AnimatePresence mode="sync">
+            {hand.map((card, index) => (
+              <motion.div
+                key={index}
+                //   ref={cardRefs[index]}
+                className={clsx("z-50", {
+                  "cursor-pointer": card !== "pan",
+                })}
+              >
+                <Dropdown
+                  card={card}
+                  handleCardSelection={handleCardSelection}
+                  player={player}
+                  index={index}
+                  hand={hand}
+                  fusionState={fusionState}
+                  setFusionState={setFusionState}
+                  fusionMaterial={fusionMaterial}
+                  setFusionMaterial={setFusionMaterial}
+                  handleCardEffect={handleCardEffect}
+                  setGameState={setGameState}
+                  gameState={gameState}
+                  startFusion={startFusion}
+                  endFusion={endFusion}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
       <div
@@ -779,17 +784,43 @@ export default function Player({
         {health}
       </div>
       <div
-        className={clsx("playerDiscard absolute w-[7.6vw] aspect-[2/3] left-[calc(0.7vw)]", {
-          "top-[calc(0.7vw)]": player === 2,
-          "top-[calc(100%-0.7vw-11.25vw)]": player === 1,
-        })}
+        className={clsx(
+          "playerDiscard group absolute w-[7.6vw] aspect-[2/3] left-[calc(0.7vw)] origin-bottom transition-all duration-500 ease-in-out hover:-rotate-[15deg] z-50",
+          {
+            "top-[calc(0.7vw)]": player === 2,
+            "top-[calc(100%-0.7vw-11.25vw)]": player === 1,
+          }
+        )}
+        onClick={() => document.getElementById("my_modal_2").showModal()}
       >
-        <span className={clsx("absolute top-1 left-2 z-10")}>{playerDiscard.length}</span>
+        <span className={clsx("absolute top-1 left-2 z-10")}>
+          {playerDiscard.length}
+        </span>
 
         {playerDiscard.map((card, i) => {
-          return <Card name={card} position={"discard"} revealed={true} />;
+          return (
+            <Card name={card} position={"discard"} revealed={true} index={i} />
+          );
         })}
-        
+        <dialog id="my_modal_2" className="modal">
+        <div className="modal-box px-4 py-0 bg-gradient-to-b from-[#6DBECB] to-[#406E75] ">
+        <div className="space-y-5 m-0 p-4 bg-neutral">
+            <h3 className={clsx(ubuntu.className, "font-bold text-[1.75vw] px-5 py-2 bg-black/40 rounded-full text-center")}>
+              {player === 1 ? "Player 1" : "Oppenent"} Discarded Cards
+            </h3>
+
+            <p className="py-4">These are the cards that {player === 1 && "You"}{ player === 2 && "Your Oppenent"} have played:</p>
+            <div className="flex items-center gap-3 overflow-x-auto">
+              {playerDiscard.map((card, i) => {
+                return <Card name={card} revealed={true} index={i} />;
+              })}
+            </div>
+            </div>
+          </div>
+          <form method="dialog" className="modal-backdrop">
+            <button>close</button>
+          </form>
+        </dialog>
       </div>
     </>
   );
@@ -811,17 +842,50 @@ function Dropdown({
   startFusion,
   endFusion,
 }) {
+  const fieldWidth = (document.querySelector(".field").offsetWidth * 7.5) / 112;
+  console.log(fieldWidth);
+  const cardWidth = 10;
+  const cardGap = 0;
+  let cardSpace = hand.length * cardWidth + cardGap * (hand.length - 1);
+  let card1Right = (fieldWidth - cardSpace) / 2;
+  const [played, setPlayed] = useState(false);
   return (
-    <div
+    <motion.div
+      whileHover={{
+        scale: 1.3,
+        translateY: player === 1 ? "15%" : "25%",
+        transition: { duration: 0.2, ease: "linear" },
+      }}
+      whileTap={{ scale: 0.9 }}
+      initial={{
+        scale: 1,
+        translateY: 0,
+        right: 10.5,
+        bottom: player === 1 && "0.7vw",
+        top: player === 2 && "0.7vw",
+      }}
+      animate={{
+        scale: 1.2,
+        translateY: player === 1 ? "50%" : "-50%",
+        right:
+          index === hand.length - 1
+            ? `${card1Right}vw`
+            : `${
+                card1Right + (cardWidth + cardGap) * (hand.length - index - 1)
+              }vw`,
+        transition: { duration: 0.3, ease: "easeOut" },
+      }}
+    
       className={clsx(
-        " dropdown dropdown-top dropdown-hover transition-all duration-300 ease-in-out z-50",
+        "absolute dropdown dropdown-top dropdown-hover transition-all duration-300 ease-in-out z-50",
         {
-          "translate-y-1/2 hover:translate-y-1/4": player === 1,
-          "-translate-y-1/2 hover:-translate-y-1/4": player === 2,
+          // "animate-played":
+          //   played,
         }
       )}
     >
       <div
+        className=""
         role="button"
         onClick={(e) => {
           endFusion(e, index, player);
@@ -843,10 +907,16 @@ function Dropdown({
             onClick={() => {
               card !== "pan" &&
                 card !== "dinner" &&
-                handleCardSelection(player, index);
+                (setPlayed((played) => !played), // handleCardSelection(player, index);
+                handleCardSelection(player, index),
+                setTimeout(() => {
+                  setPlayed(false);
+                }, 1000));
               card === "dinner" ? handleCardEffect(player, card, index) : null;
             }}
-            className={clsx({ "btn-disabled text-slate-600": card === "pan" })}
+            className={clsx({
+              "btn-disabled text-slate-600": card === "pan",
+            })}
           >
             Play
           </button>
@@ -861,6 +931,6 @@ function Dropdown({
           </a>
         </li>
       </ul>
-    </div>
+    </motion.div>
   );
 }

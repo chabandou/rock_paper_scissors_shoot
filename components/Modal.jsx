@@ -1,5 +1,8 @@
+import { ubuntu } from "@/app/font";
 import { cardsCounter } from "@/libs/utils";
+import clsx from "clsx";
 import { useEffect } from "react";
+import Card from "./animata/Card";
 
 export default function Modal({
   selectedPowerCards,
@@ -73,52 +76,62 @@ export default function Modal({
         open modal
       </button>
       <dialog id="my_modal_1" className="modal">
-        <div className="modal-box space-y-4">
-          <h3 className="font-bold text-lg">Power Cards</h3>
-          <p className="">
-            Select up to 4 power cards you want to use. Only 3 cards of each
-            type can be selected.
-          </p>
-          <div className="flex gap-2">
-            {PowerCARDS.map((powerCard) => (
-              <button
-                className="btn"
-                key={powerCard}
-                onClick={() =>
-                  setSelectedPowerCards((powerCards) => [
-                    ...powerCards,
-                    powerCard,
-                  ])
-                }
-                disabled={
-                  cardsCounter(selectedPowerCards)[powerCard] === 4 ||
-                  selectedPowerCards.length === 4
-                }
-              >
-                {powerCard}
-              </button>
-            ))}
-          </div>
-          <div>
-            <span>Selected Cards: {selectedPowerCards.join(", ")}</span>
-          </div>
-          <div className="modal-action">
-            <button
-              className="btn"
-              onClick={() => setSelectedPowerCards([])}
-              disabled={selectedPowerCards.length === 0}
+        <div className="modal-box px-4 py-0 bg-gradient-to-b from-[#6DBECB] to-[#406E75]">
+          <div className="space-y-5 m-0 p-4 bg-neutral">
+
+            <h3
+              className={clsx(
+                ubuntu.className,
+                "font-bold text-[1.75vw] px-5 py-2 bg-white/5 rounded-full text-center"
+              )}
             >
-              Reset
-            </button>
-            <form method="dialog">
+              Select Your Power Cards
+            </h3>
+            <p className="">
+              Select up to 4 power cards you want to add to use Deck & use in
+              game. Only 3 cards of each type can be selected.
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              {PowerCARDS.map((powerCard) => (
+                <button
+                  className="btn h-fit p-0 rounded-2xl"
+                  key={powerCard}
+                  onClick={() =>
+                    setSelectedPowerCards((powerCards) => [
+                      ...powerCards,
+                      powerCard,
+                    ])
+                  }
+                  disabled={
+                    cardsCounter(selectedPowerCards)[powerCard] === 4 ||
+                    selectedPowerCards.length === 4
+                  }
+                >
+                  <Card name={powerCard} revealed={true} />
+                </button>
+              ))}
+            </div>
+            <div>
+              <span>Selected Cards: {selectedPowerCards.join(", ")}</span>
+            </div>
+            <div className="modal-action">
               <button
                 className="btn"
-                onClick={handleAddingPCards}
-                disabled={selectedPowerCards.length < 4}
+                onClick={() => setSelectedPowerCards([])}
+                disabled={selectedPowerCards.length === 0}
               >
-                Start Game
+                Reset
               </button>
-            </form>
+              <form method="dialog">
+                <button
+                  className="btn hover:bg-[#62abb6] hover:text-neutral"
+                  onClick={handleAddingPCards}
+                  disabled={selectedPowerCards.length < 4}
+                >
+                  Start Game
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </dialog>
