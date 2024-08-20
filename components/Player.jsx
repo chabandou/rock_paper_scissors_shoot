@@ -1,4 +1,4 @@
-import { cardsCounter } from "@/libs/utils";
+import { cardsCounter, cn } from "@/libs/utils";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import Card from "./animata/Card";
@@ -683,6 +683,7 @@ export default function Player({
       : deck.length === 2
       ? "/card-deck-only2.svg"
       : "/card-back2.svg";
+
   return (
     <>
       <div
@@ -712,10 +713,10 @@ export default function Player({
       </div>
 
       <div
-        className={clsx("deck absolute aspect-[2/3] right-[calc(0.7vw)]", {
+        className={cn("deck absolute aspect-[2/3] right-[calc(0.7vw)]", {
           "top-[calc(0.7vw)]": player === 2,
           "bottom-[calc(0.7vw)]": player === 1,
-          "aspect-[2.2/3] w-[9vw]": deckSrc === "/card-deck.svg",
+          "aspect-[2.15/3] w-[9vw]": deckSrc === "/card-deck.svg",
           "w-[7.6vw]": deckSrc !== "/card-deck.svg",
         })}
       >
@@ -746,32 +747,28 @@ export default function Player({
       >
         <div className="hand flex items-center justify-center gap-2">
           <AnimatePresence mode="sync">
-            {hand.map((card, index) => (
-              <motion.div
-                key={index}
-                //   ref={cardRefs[index]}
-                className={clsx("z-50", {
-                  "cursor-pointer": card !== "pan",
-                })}
-              >
+            <motion.div
+              animate={{
+                opacity: 1,
+                transition: { staggerChildren: 0.1, delayChildren: 0.3 },
+              }}
+            >
+              {hand.map((card, index) => (
                 <Dropdown
+                  key={index}
                   card={card}
-                  handleCardSelection={handleCardSelection}
-                  player={player}
                   index={index}
+                  player={player}
                   hand={hand}
-                  fusionState={fusionState}
-                  setFusionState={setFusionState}
-                  fusionMaterial={fusionMaterial}
-                  setFusionMaterial={setFusionMaterial}
+                  handleCardSelection={handleCardSelection}
                   handleCardEffect={handleCardEffect}
-                  setGameState={setGameState}
-                  gameState={gameState}
                   startFusion={startFusion}
                   endFusion={endFusion}
+                  fusionState={fusionState}
+                  round={round}
                 />
-              </motion.div>
-            ))}
+              ))}
+            </motion.div>
           </AnimatePresence>
         </div>
       </div>
@@ -785,15 +782,19 @@ export default function Player({
       </div>
       <div
         className={clsx(
-          "playerDiscard group absolute w-[7.6vw] aspect-[2/3] left-[calc(0.7vw)] origin-bottom transition-all duration-500 ease-in-out hover:-rotate-[15deg] z-50",
+          "playerDiscard group absolute w-[7.6vw] aspect-[2/3] left-[calc(0.7vw)] origin-bottom transition-all duration-500 ease-in-out hover:-rotate-[15deg] z-10",
           {
             "top-[calc(0.7vw)]": player === 2,
             "top-[calc(100%-0.7vw-11.25vw)]": player === 1,
           }
         )}
-        onClick={() => document.getElementById("my_modal_2").showModal()}
+        onClick={() =>
+          document
+            .getElementById(player === 1 ? "my_modal_3" : "my_modal_2")
+            .showModal()
+        }
       >
-        <span className={clsx("absolute top-1 left-2 z-10")}>
+        <span className={clsx("absolute top-1 left-2 z-[5]")}>
           {playerDiscard.length}
         </span>
 
@@ -802,19 +803,30 @@ export default function Player({
             <Card name={card} position={"discard"} revealed={true} index={i} />
           );
         })}
-        <dialog id="my_modal_2" className="modal">
-        <div className="modal-box px-4 py-0 bg-gradient-to-b from-[#6DBECB] to-[#406E75] ">
-        <div className="space-y-5 m-0 p-4 bg-neutral">
-            <h3 className={clsx(ubuntu.className, "font-bold text-[1.75vw] px-5 py-2 bg-black/40 rounded-full text-center")}>
-              {player === 1 ? "Player 1" : "Oppenent"} Discarded Cards
-            </h3>
+        <dialog
+          id={player === 1 ? "my_modal_3" : "my_modal_2"}
+          className="modal"
+        >
+          <div className="modal-box px-4 py-0 bg-gradient-to-b from-[#6DBECB] to-[#406E75] ">
+            <div className="space-y-5 m-0 p-4 bg-neutral">
+              <h3
+                className={clsx(
+                  ubuntu.className,
+                  "font-bold text-[1.75vw] px-5 py-2 bg-black/40 rounded-full text-center"
+                )}
+              >
+                {player === 1 ? "Player 1" : "Opponent"} Discarded Cards
+              </h3>
 
-            <p className="py-4">These are the cards that {player === 1 && "You"}{ player === 2 && "Your Oppenent"} have played:</p>
-            <div className="flex items-center gap-3 overflow-x-auto">
-              {playerDiscard.map((card, i) => {
-                return <Card name={card} revealed={true} index={i} />;
-              })}
-            </div>
+              <p className="py-4">
+                These are the cards that{" "}
+                {player === 1 ? "You" : "Your Oppenent"} have played:
+              </p>
+              <div className="flex items-center gap-3 overflow-x-auto">
+                {playerDiscard.map((card, i) => {
+                  return <Card name={card} revealed={true} index={i} />;
+                })}
+              </div>
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
@@ -828,39 +840,38 @@ export default function Player({
 
 function Dropdown({
   card,
-  handleCardSelection,
-  player,
   index,
+  player,
   hand,
   fusionState,
-  setFusionState,
-  fusionMaterial,
-  setFusionMaterial,
+  handleCardSelection,
   handleCardEffect,
-  setGameState,
-  gameState,
   startFusion,
   endFusion,
+  round,
+  key,
 }) {
-  const fieldWidth = (document.querySelector(".field").offsetWidth * 7.5) / 112;
+  const fieldWidth =
+    (document.querySelector(".field")?.offsetWidth * 7.5) / 112;
   console.log(fieldWidth);
   const cardWidth = 10;
   const cardGap = 0;
   let cardSpace = hand.length * cardWidth + cardGap * (hand.length - 1);
   let card1Right = (fieldWidth - cardSpace) / 2;
-  const [played, setPlayed] = useState(false);
   return (
     <motion.div
+      key={key}
       whileHover={{
         scale: 1.3,
         translateY: player === 1 ? "15%" : "25%",
-        transition: { duration: 0.2, ease: "linear" },
+        transition: { duration: 0.1, ease: "linear" },
       }}
-      whileTap={{ scale: 0.9 }}
+      // whileTap={{ scale: 0.9 }}
       initial={{
-        scale: 1,
+        position: "absolute",
+        scale: 1.1,
         translateY: 0,
-        right: 10.5,
+        right: "0.7vw",
         bottom: player === 1 && "0.7vw",
         top: player === 2 && "0.7vw",
       }}
@@ -873,15 +884,20 @@ function Dropdown({
             : `${
                 card1Right + (cardWidth + cardGap) * (hand.length - index - 1)
               }vw`,
-        transition: { duration: 0.3, ease: "easeOut" },
+        transition: { duration: 0.3, ease: "easeOut", delay: round === 1 && (0.3 * (hand.length - index - 1)) },
       }}
-    
+      exit={{
+        scale: 1,
+        right: player === 1 ? `calc(50% + 7.5vw)` : `calc(50% - 15vw)`,
+        top: player === 2 && "50%",
+        bottom: player === 1 && "50%",
+        translateY: player === 1 ? "50%" : "-50%",
+        translateX: player === 1 ? "50%" : "-50%",
+        rotateY: player === 1 ? "180deg" : "0deg",
+        transition: { duration: 0.2, ease: "linear" },
+      }}
       className={clsx(
-        "absolute dropdown dropdown-top dropdown-hover transition-all duration-300 ease-in-out z-50",
-        {
-          // "animate-played":
-          //   played,
-        }
+        "dropdown dropdown-top dropdown-hover transition-all duration-300 ease-in-out z-50"
       )}
     >
       <div
@@ -891,7 +907,7 @@ function Dropdown({
           endFusion(e, index, player);
         }}
       >
-        <Card name={card} revealed={player === 1 && true} position={"hand"} />
+        <Card name={card} revealed={player === 1 && true}  position={"hand"} />
       </div>
       <ul
         tabIndex={0}
@@ -907,12 +923,10 @@ function Dropdown({
             onClick={() => {
               card !== "pan" &&
                 card !== "dinner" &&
-                (setPlayed((played) => !played), // handleCardSelection(player, index);
                 handleCardSelection(player, index),
-                setTimeout(() => {
-                  setPlayed(false);
-                }, 1000));
-              card === "dinner" ? handleCardEffect(player, card, index) : null;
+                card === "dinner"
+                  ? handleCardEffect(player, card, index)
+                  : null;
             }}
             className={clsx({
               "btn-disabled text-slate-600": card === "pan",

@@ -1,5 +1,6 @@
 import { ubuntu } from "@/app/font";
 import { fusionCards } from "@/libs/cards";
+import { cn } from "@/libs/utils";
 import clsx from "clsx";
 import Image from "next/image";
 
@@ -21,12 +22,12 @@ export default function Card({ name, position, revealed, index }) {
       )}
     >
       <div
-        className={clsx(
-          "relative w-full h-full [transform-style:preserve-3d] shadow-xl transition duration-500 ease-in-out delay-[2000ms]",
+        className={cn(
+          "relative w-full h-full [transform-style:preserve-3d] [transform:rotateY(180deg)] shadow-xl transition duration-500 ease-in-out delay-[2000ms]",
           {
             "": position === "activeCard",
           },
-          revealed ? "[transform:rotateY(0deg)]" : "[transform:rotateY(180deg)]"
+          revealed && "[transform:rotateY(0deg)]"
         )}
       >
         <div className="front absolute top-0 left-0 [backface-visibility:hidden] w-full h-full">
@@ -36,7 +37,7 @@ export default function Card({ name, position, revealed, index }) {
             fill
             className="object-contain absolute top-0 left-0 z-10"
           />
-          <div className={clsx("absolute top-[66%] left-1/2 -translate-x-1/2 z-20 capitalize w-full text-center", 
+          <div className={clsx("absolute top-2/3 left-1/2 -translate-x-1/2 z-20 capitalize w-full text-center", 
           {
             "top-[64%]": position === "hand",
           }

@@ -1,6 +1,6 @@
 "use client";
 
-import EndGameModal from "@/components/endGameModal";
+import EndGameModal from "@/components/EndGameModal";
 import Modal from "@/components/Modal";
 import PanModal from "@/components/PanModal";
 import Player from "@/components/Player";
@@ -11,6 +11,9 @@ import { CARDS } from "@/libs/cards";
 import Card from "@/components/animata/Card";
 import { ubuntu } from "./font";
 import clsx from "clsx";
+import { fusionCards } from "@/libs/cards";
+
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function Home() {
   const [panUsed, setPanUsed] = useState(null);
@@ -148,22 +151,20 @@ export default function Home() {
       ) {
         setRevealed(true);
         setTimeout(() => handlePanCounter(1), 3000);
-
       } else if (
         player1Card === "shoot" &&
         gameState.player2.hand.includes("pan")
       ) {
         setRevealed(true);
         setTimeout(() => handlePanCounter(2), 3000);
-
       } else {
         setRevealed(true);
         setTimeout(() => playRound(player1Card, player2Card), 3000);
       }
     }
     if (player1Card && !player2Card) {
+      setRevealed(true);
       setTimeout(() => {
-        setRevealed(true);
         setTimeout(() => {
           matchLog.push(
             "Round " +
@@ -197,7 +198,7 @@ export default function Home() {
           drawCard("player2");
 
           setTimeout(() => {
-            setGameState({...gameState});
+            setGameState({ ...gameState });
             setRoundWinner(null);
             setRevealed(false);
           }, 1500);
@@ -257,15 +258,8 @@ export default function Home() {
       gameState.player1.hand = gameState.player1.hand.filter(
         (_, index) => index !== cardIndex
       );
-      setGameState((prevState) => {
-        return {
-          ...prevState,
-          player1: {
-            ...prevState.player1,
-            hand: gameState.player1.hand,
-            activeCard: gameState.player1.activeCard,
-          },
-        };
+      setGameState({
+        ...gameState,
       });
       // console.log(
       //   "from after handleCardSelection Fn \n",
@@ -305,9 +299,24 @@ export default function Home() {
     //   "\n deck:",
     //   gameState.player1.deck
     // );
+
+    let player1CardLogDisplay = fusionCards[player1Card]?.name
+      ? fusionCards[player1Card].name
+      : player1Card;
+
+    let player2CardLogDisplay = fusionCards[player2Card]?.name
+      ? fusionCards[player2Card].name
+      : player2Card;
+
     matchLog.push(
-      "Round " + gameState.round + ": " + player1Card + " vs. " + player2Card
+      "Round #" +
+        gameState.round +
+        ": " +
+        player1CardLogDisplay +
+        " vs. " +
+        player2CardLogDisplay
     );
+
     setMatchLog(matchLog);
 
     let newGameState = { ...gameState };
@@ -591,12 +600,16 @@ export default function Home() {
     let newGameState = { ...gameState };
     setTimeout(() => {
       if (gameState.player2.activeCard) {
+        let player2CardLogDisplay = fusionCards[gameState.player2.activeCard]
+          ?.name
+          ? fusionCards[gameState.player2.activeCard].name
+          : gameState.player2.activeCard;
+
         matchLog.push(
-          "Round " +
+          "Round #" +
             gameState.round +
-            ": Player 1 Pass" +
-            " vs." +
-            gameState.player2.activeCard
+            ": Player 1 Pass vs. " +
+            player2CardLogDisplay
         );
         setMatchLog(matchLog);
 
@@ -642,13 +655,13 @@ export default function Home() {
 
   useEffect(() => {
     if (passedTurn) {
-    setRevealed(true);
+      setRevealed(true);
     }
   }, [passedTurn]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-primary/25 p-6">
-      <div className="z-10 w-full max-w-5xl items-center justify-between lg:flex flex-col">
+    <main className="flex w-full min-h-screen items-center justify-center bg-primary/25 p-2">
+      <div className="z-10 w-full items-center justify-center lg:flex flex-col">
         <Modal
           selectedPowerCards={selectedPowerCards}
           setSelectedPowerCards={setSelectedPowerCards}
@@ -665,60 +678,132 @@ export default function Home() {
           setGameState={setGameState}
         />
         <div>
-          <h1 className={clsx(ubuntu.className, "text-5xl font-bold")}>Rock, Paper, Scissors, Shoot!</h1>
+          <h1
+            className={clsx(ubuntu.className, "game-title text-5xl font-bold ")}
+          >
+            Rock, Paper, Scissors, SHOOT!
+          </h1>
           <h2 className="text-3xl font-bold">Round {gameState.round}</h2>
         </div>
-        <section className="field relative w-[70vw] aspect-[1.54/1] border-4 border-white/80 overflow-hidden bg-black">
-          <Image
-            src="/field.svg"
-            alt="field"
-            fill
-            className="object-contain absolute top-0 left-0 z-0 "
-          />
-          <div className="">
-            <div className="absolute top-1/2 -translate-y-1/2 right-[15px] z-30">
-              <button
-                className="btn btn-neutral"
-                onClick={() => (passTurn())}
-                disabled={passedTurn}
-              >
-                Pass turn
-              </button>
+        <div className="flex w-full h-fit items-center justify-around">
+          <div className="w-[25vw] min-h-[44.45vw] z-10 flex flex-col items-center justify-center gap-2">
+            <h2
+              className={clsx(
+                ubuntu.className,
+                "font-bold text-[1.75vw] px-5 py-2 bg-white/5 rounded-full text-center flex gap-3"
+              )}
+            >
+              Game Log <Image src="/log.svg" alt="log" width={35} height={35} />
+            </h2>
+            <div className="flex w-full min-h-[42.45vw] flex-col gap-1 mt-2">
+              {matchLog.map((match, i) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  key={i}
+                  className="w-full flex h-10 rounded-full overflow-hidden"
+                >
+                  <div className="w-1/4 h-full scale-[2] -translate-x-1/4 -translate-y-2 bg-[#75ccda] rotate-12 z-10 border-r-2 "></div>
+
+                  <div
+                    className={clsx(
+                      "w-full h-full  flex items-center justify-start",
+                      {
+                        "bg-[#406E75]/40": i % 2 === 0,
+                        "bg-[#406E75]/80": i % 2 !== 0,
+                      }
+                    )}
+                  >
+                    <span className="-translate-x-[4.2vw] text-[1.05vw] z-20 font-extrabold text-[#1d464c]">
+                      {match.split(":")[0]}
+                    </span>
+                    <span className="text-[1.15vw] h-full text-center flex items-center capitalize">
+                      {match.split(":")[1]}
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-            <Player
-              player={1}
-              gameState={gameState}
-              playerState={gameState.player1}
-              opponentDiscard={gameState.player2.discard}
-              handleCardSelection={handleCardSelection}
-              handleCardEffect={handleCardEffect}
-              setGameState={setGameState}
-              endFusion={endFusion}
-              fusionState={fusionState}
-              setFusionState={setFusionState}
-              fusionMaterial={fusionMaterial}
-              setFusionMaterial={setFusionMaterial}
-              revealed={revealed}
-            />
-            <Player
-              player={2}
-              gameState={gameState}
-              playerState={gameState.player2}
-              opponentHealth={gameState.player1.health}
-              opponentDiscard={gameState.player1.discard}
-              handleCardSelection={handleCardSelection}
-              setGameState={setGameState}
-              endFusion={endFusion}
-              fusionState={fusionState}
-              setFusionState={setFusionState}
-              fusionMaterial={fusionMaterial}
-              setFusionMaterial={setFusionMaterial}
-              initialAIPowerCards={initialAIPowerCards}
-              setInitialAIPowerCards={setInitialAIPowerCards}
-              revealed={revealed}
-            />
           </div>
-        </section>
+          <section className="field relative w-[70vw] aspect-[1.54/1] border-4 border-white/80 overflow-hidden bg-black">
+            <AnimatePresence>
+              {roundWinner && (
+                <motion.div
+                  className="absolute bg-black/50 w-full h-full flex items-center justify-center z-[49]"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                >
+                  <motion.div
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    {roundWinner === "tie" ? (
+                      <h1 className="text-[2.75vw] font-bold capitalize">It's a tie!</h1>
+                    ) : (
+                      <h1 className="text-[2.75vw] font-bold capitalize">
+                        {roundWinner} wins this round!
+                      </h1>
+                    )}
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <Image
+              src="/field.svg"
+              alt="field"
+              fill
+              className="object-contain absolute top-0 left-0 z-0 "
+            />
+            <div className="">
+              <div className="absolute top-1/2 -translate-y-1/2 right-[15px] z-30">
+                <button
+                  className="btn btn-neutral"
+                  onClick={() => passTurn()}
+                  disabled={passedTurn}
+                >
+                  Pass turn
+                </button>
+              </div>
+              <Player
+                player={1}
+                gameState={gameState}
+                playerState={gameState.player1}
+                opponentDiscard={gameState.player2.discard}
+                handleCardSelection={handleCardSelection}
+                handleCardEffect={handleCardEffect}
+                setGameState={setGameState}
+                endFusion={endFusion}
+                fusionState={fusionState}
+                setFusionState={setFusionState}
+                fusionMaterial={fusionMaterial}
+                setFusionMaterial={setFusionMaterial}
+                revealed={revealed}
+              />
+              <Player
+                player={2}
+                gameState={gameState}
+                playerState={gameState.player2}
+                opponentHealth={gameState.player1.health}
+                opponentDiscard={gameState.player1.discard}
+                handleCardSelection={handleCardSelection}
+                setGameState={setGameState}
+                endFusion={endFusion}
+                fusionState={fusionState}
+                setFusionState={setFusionState}
+                fusionMaterial={fusionMaterial}
+                setFusionMaterial={setFusionMaterial}
+                initialAIPowerCards={initialAIPowerCards}
+                setInitialAIPowerCards={setInitialAIPowerCards}
+                revealed={revealed}
+              />
+            </div>
+          </section>
+        </div>
 
         <EndGameModal
           gameState={gameState}
@@ -726,23 +811,10 @@ export default function Home() {
           gameWinner={gameWinner}
           setGameWinner={setGameWinner}
           initializeDeck={initializeDeck}
+          matchLog={matchLog}
+          setMatchLog={setMatchLog}
         />
-        {roundWinner &&
-          (roundWinner === "tie" ? (
-            <h1 className="text-3xl">It's a tie!</h1>
-          ) : (
-            <h1 className="text-3xl">{roundWinner} wins this round!</h1>
-          ))}
       </div>
     </main>
   );
-}
-
-{
-  /* <div className="z-10 w-full max-w-5xl flex flex-col items-center justify-center">
-<h2 className="text-3xl font-bold">Match Log</h2>
-{matchLog.map((match, i) => (
-  <h3 key={i}>{match}</h3>
-))}
-</div> */
 }
