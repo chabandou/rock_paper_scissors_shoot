@@ -10,8 +10,8 @@ export default function Modal({
   PowerCARDS,
   setGameState,
   gameState,
-  initialAIPowerCards,
   setInitialAIPowerCards,
+  gameStarted
 }) {
   function selectAIPowerCards() {
     let AIPowerCards = [];
@@ -37,10 +37,10 @@ export default function Modal({
     return AIPowerCards;
   }
   useEffect(() => {
-    if (gameState.round === 0) {
-      document.getElementById("my_modal_1").showModal();
+    if (gameState.round === 0 && gameStarted) {
+      setTimeout(() => document.getElementById("my_modal_1").showModal(), 600);
     }
-  }, [gameState.round]);
+  }, [gameState.round, gameStarted]);
 
   function handleAddingPCards() {
     gameState.player1.deck = [...gameState.player1.deck, ...selectedPowerCards];
@@ -77,7 +77,7 @@ export default function Modal({
       </button>
       <dialog id="my_modal_1" className="modal">
         <div className="modal-box px-4 py-0 bg-gradient-to-b from-[#6DBECB] to-[#406E75]">
-          <div className="space-y-5 m-0 p-4 bg-neutral">
+          <div className="space-y-8 m-0 p-4 bg-neutral">
 
             <h3
               className={clsx(
@@ -88,13 +88,12 @@ export default function Modal({
               Select Your Power Cards
             </h3>
             <p className="">
-              Select up to 4 power cards you want to add to use Deck & use in
-              game. Only 3 cards of each type can be selected.
+              Select up to 4 Power Cards you want to add to your Deck. Only 3 cards of each type can be selected.
             </p>
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-7">
               {PowerCARDS.map((powerCard) => (
                 <button
-                  className="btn h-fit p-0 rounded-2xl"
+                  className="btn leading-normal scale-[1.15] h-fit p-0 rounded-2xl"
                   key={powerCard}
                   onClick={() =>
                     setSelectedPowerCards((powerCards) => [
@@ -112,7 +111,7 @@ export default function Modal({
               ))}
             </div>
             <div>
-              <span>Selected Cards: {selectedPowerCards.join(", ")}</span>
+              <span className="capitalize">Selected Cards: {selectedPowerCards.join(", ")}</span>
             </div>
             <div className="modal-action">
               <button

@@ -16,6 +16,20 @@
   }
 }
 
+::-webkit-scrollbar {
+  display: none;
+}
+
+.endGameModelContent{
+  scrollbar-color: rgba(255, 255, 255, 0.607) transparent;
+  scrollbar-width: none;
+}
+
+html {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -32,35 +46,22 @@ body {
   }
 }
 
-.drawAnim {
-  animation: draw 0.5s ease-in-out forwards;
-}
-
-@keyframes draw {
-  0% {
-    transform: rotateY(180deg);
-  }
-  100% {
-    transform: rotateY(0deg);
-  }
-}
-
-.drawAnim-p1Pos {
-  
-  animation: draww 0.5s ease-in-out forwards;
-}
-
-@keyframes draww {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(50%);
-  }
-}
-
 
 .game-title {
-  
   letter-spacing: -2px;
+}
+
+.playerDiscard:hover .playing-card-1 {
+  transform: rotate(10deg);
+  transform-origin: bottom;
+}
+
+.playerDiscard:hover .playing-card-2 {
+  transform: rotate(25deg);
+  transform-origin: bottom;
+}
+
+.playerDiscard:hover .playing-card-0 {
+  transform: rotate(-5deg);
+  transform-origin: bottom;
 }

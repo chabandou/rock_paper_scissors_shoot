@@ -15,6 +15,12 @@ import { fusionCards } from "@/libs/cards";
 
 import { AnimatePresence, motion } from "framer-motion";
 
+import {
+  MouseParallaxChild,
+  MouseParallaxContainer,
+} from "react-parallax-mouse";
+import HowToPlayModal from "@/components/HowToPlayModal";
+
 export default function Home() {
   const [panUsed, setPanUsed] = useState(null);
   const [matchLog, setMatchLog] = useState([]);
@@ -23,6 +29,8 @@ export default function Home() {
   const [gameWinner, setGameWinner] = useState("");
 
   const [revealed, setRevealed] = useState(false);
+
+  const [gameStarted, setGameStarted] = useState(false);
 
   /// Power Cards logic
 
@@ -110,7 +118,8 @@ export default function Home() {
     if (
       gameState.round === 0 &&
       gameState.player1.deck.length === 10 &&
-      gameState.player2.deck.length === 10
+      gameState.player2.deck.length === 10 &&
+      gameStarted
     ) {
       gameState.player1.deck = shuffle(gameState.player1.deck);
 
@@ -130,6 +139,7 @@ export default function Home() {
     gameState.player1.health,
     gameState.player2.health,
     gameState.player1.deck.length,
+    gameStarted,
   ]);
 
   // Round Playing logic after selecting active cards
@@ -167,10 +177,10 @@ export default function Home() {
       setTimeout(() => {
         setTimeout(() => {
           matchLog.push(
-            "Round " +
+            "Round #" +
               gameState.round +
               ": " +
-              player1Card +
+              fusionCards[player1Card]?.name +
               " vs. Player 2 Pass"
           );
           setMatchLog(matchLog);
@@ -191,13 +201,11 @@ export default function Home() {
           // Remove the cards from the active cards
           gameState.player1.activeCard = null;
 
-          // Add the cards to the discard pile
-          gameState.player1.discard.push(player1Card);
-
-          drawCard("player1");
-          drawCard("player2");
-
           setTimeout(() => {
+            // Add the cards to the discard pile
+            gameState.player1.discard.push(player1Card);
+            drawCard("player1");
+            drawCard("player2");
             setGameState({ ...gameState });
             setRoundWinner(null);
             setRevealed(false);
@@ -408,14 +416,13 @@ export default function Home() {
     newGameState.player2.activeCard = null;
 
     // Add the cards to the discard pile
-    newGameState.player1.discard.push(player1Card);
-    newGameState.player2.discard.push(player2Card);
-
-    drawCard("player1");
-    drawCard("player2");
 
     setTimeout(() => {
+      newGameState.player1.discard.push(player1Card);
+      newGameState.player2.discard.push(player2Card);
       setGameState(newGameState);
+      drawCard("player1");
+      drawCard("player2");
       setRoundWinner(null);
       setRevealed(false);
     }, 1500);
@@ -600,6 +607,7 @@ export default function Home() {
     let newGameState = { ...gameState };
     setTimeout(() => {
       if (gameState.player2.activeCard) {
+        const player2Card = gameState.player2.activeCard;
         let player2CardLogDisplay = fusionCards[gameState.player2.activeCard]
           ?.name
           ? fusionCards[gameState.player2.activeCard].name
@@ -625,11 +633,21 @@ export default function Home() {
         }
         setRoundWinner("player 2");
 
-        // Add the cards to the discard pile
-        newGameState.player2.discard.push(gameState.player2.activeCard);
-
         // Remove the cards from the active cards
         newGameState.player2.activeCard = null;
+
+        newGameState.round += 1;
+
+        setTimeout(() => {
+          // Add the cards to the discard pile
+          newGameState.player2.discard.push(player2Card);
+          drawCard("player1");
+          drawCard("player2");
+          setGameState(newGameState);
+          setRoundWinner(null);
+          setPassedTurn(false);
+          setRevealed(false);
+        }, 1500);
       } else if (!gameState.player2.activeCard) {
         matchLog.push(
           "Round " + gameState.round + ": Player 1 Pass vs.Player 2 Pass"
@@ -638,18 +656,18 @@ export default function Home() {
         setMatchLog(matchLog);
 
         setRoundWinner("It's a tie!");
+
+        newGameState.round += 1;
+
+        setTimeout(() => {
+          drawCard("player1");
+          drawCard("player2");
+          setGameState(newGameState);
+          setRoundWinner(null);
+          setPassedTurn(false);
+          setRevealed(false);
+        }, 1500);
       }
-
-      newGameState.round += 1;
-
-      drawCard("player1");
-      drawCard("player2");
-      setTimeout(() => {
-        setGameState(newGameState);
-        setRoundWinner(null);
-        setPassedTurn(false);
-        setRevealed(false);
-      }, 1500);
     }, 3000);
   }
 
@@ -659,10 +677,22 @@ export default function Home() {
     }
   }, [passedTurn]);
 
+  function handleNewGame() {
+    const element = document.getElementById("gameSection");
+
+    if (element) {
+      element.style.display = "flex";
+      element.scrollIntoView({ behavior: "smooth" });
+      setGameStarted(true);
+    }
+    return false;
+  }
+
   return (
     <main className="flex w-full min-h-screen items-center justify-center bg-primary/25 p-2">
       <div className="z-10 w-full items-center justify-center lg:flex flex-col">
         <Modal
+          gameStarted={gameStarted}
           selectedPowerCards={selectedPowerCards}
           setSelectedPowerCards={setSelectedPowerCards}
           PowerCARDS={PowerCARDS}
@@ -677,16 +707,52 @@ export default function Home() {
           hand={gameState.player1.hand}
           setGameState={setGameState}
         />
-        <div>
+
+        <section className="w-full flex flex-col items-center justify-start  min-h-screen">
           <h1
-            className={clsx(ubuntu.className, "game-title text-5xl font-bold ")}
+            className={clsx(
+              ubuntu.className,
+              " text-6xl bg-gradient-to-r from-[#6DBECB] to-[#32747e] bg-clip-text text-transparent font-black text-center mb-12 mt-4 drop-shadow-[3px_3px_0_rgba(255,255,255,0.9)] leading-tight "
+            )}
           >
-            Rock, Paper, Scissors, SHOOT!
+            Rock, Paper, Scissors,
+            <br /> Shoot!
           </h1>
-          <h2 className="text-3xl font-bold">Round {gameState.round}</h2>
-        </div>
-        <div className="flex w-full h-fit items-center justify-around">
+          <div className="flex flex-col gap-4">
+            <button
+              className="group relative btn bg-[#18626d] hover:bg-[#1b525b] btn-lg h-[6vw] w-[30vw] text-start"
+              onClick={handleNewGame}
+            >
+              <div className="w-full mx-3 flex items-center justify-between">
+                <span className="text-[1.5vw] font-extrabold">
+                  Start A New Game
+                </span>{" "}
+                <Image
+                  src="/start-game.svg"
+                  className="relative w-[6.7vw] -translate-y-[0.5vw] group-hover:scale-125 origin-bottom group-hover:rotate-12 group-hover:-translate-y-4 transition-all duration-500 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1);]"
+                  width={100}
+                  height={80}
+                />
+              </div>
+            </button>
+
+            <HowToPlayModal />
+            <div className="flex items-center justify-between font-mono text-white/80 px-1">
+              <span>Developed by:</span>
+              <span>chabandou</span>
+            </div>
+          </div>
+        </section>
+
+        <div
+          id="gameSection"
+          style={{ display: "none" }}
+          className="w-full h-fit items-center justify-around"
+        >
           <div className="w-[25vw] min-h-[44.45vw] z-10 flex flex-col items-center justify-center gap-2">
+            <h2 className="text-3xl translate-x-[28vw] -translate-y-[1vw] w-full font-bold ">
+              Round {gameState.round}
+            </h2>
             <h2
               className={clsx(
                 ubuntu.className,
@@ -700,7 +766,7 @@ export default function Home() {
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4 }}
+                  transition={{ duration: 0.4, delay: 2.1 }}
                   key={i}
                   className="w-full flex h-10 rounded-full overflow-hidden"
                 >
@@ -726,83 +792,111 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <section className="field relative w-[70vw] aspect-[1.54/1] border-4 border-white/80 overflow-hidden bg-black">
-            <AnimatePresence>
-              {roundWinner && (
-                <motion.div
-                  className="absolute bg-black/50 w-full h-full flex items-center justify-center z-[49]"
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
-                >
+          <MouseParallaxContainer
+            className="parallax border-4 border-white/80 overflow-hidden"
+            resetOnLeave
+          >
+            <MouseParallaxChild
+              factorX={0.009}
+              factorY={0.013}
+              className="field relative w-[70vw] aspect-[1.54/1]  bg-black"
+            >
+              <AnimatePresence>
+                {roundWinner && (
                   <motion.div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4 }}
+                    className="absolute bg-black/50 w-full h-full flex items-center justify-center z-[49]"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
                   >
-                    {roundWinner === "tie" ? (
-                      <h1 className="text-[2.75vw] font-bold capitalize">It's a tie!</h1>
-                    ) : (
-                      <h1 className="text-[2.75vw] font-bold capitalize">
-                        {roundWinner} wins this round!
-                      </h1>
-                    )}
+                    <motion.div
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      {roundWinner === "tie" ? (
+                        <h1 className="text-[2.25vw] scale-110 font-bold uppercase">
+                          It's a tie!
+                        </h1>
+                      ) : (
+                        <h1
+                          className={clsx(
+                            "text-[2.25vw] scale-110 font-bold uppercase",
+                            {
+                              "text-red-400": roundWinner === "player 2",
+                              "text-green-400": roundWinner === "player 1",
+                            }
+                          )}
+                        >
+                          {roundWinner === "player 1" ? "You" : roundWinner} won
+                          this round!
+                        </h1>
+                      )}
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <Image
-              src="/field.svg"
-              alt="field"
-              fill
-              className="object-contain absolute top-0 left-0 z-0 "
-            />
-            <div className="">
-              <div className="absolute top-1/2 -translate-y-1/2 right-[15px] z-30">
-                <button
-                  className="btn btn-neutral"
-                  onClick={() => passTurn()}
-                  disabled={passedTurn}
-                >
-                  Pass turn
-                </button>
+                )}
+              </AnimatePresence>
+
+              <Image
+                src="/field.svg"
+                alt="field"
+                fill
+                className="object-contain absolute top-0 left-0 z-0 "
+              />
+              <Image
+                src="/field-bg.svg"
+                alt="field-bg"
+                fill
+                className="object-contain absolute top-0 left-0 z-0 "
+              />
+
+              <div className="">
+                <div className="absolute top-1/2 -translate-y-1/2 right-[15px] z-30">
+                  <button
+                    className="btn btn-neutral"
+                    onClick={() => passTurn()}
+                    disabled={passedTurn}
+                  >
+                    Pass turn
+                  </button>
+                </div>
+                <Player
+                  player={1}
+                  gameState={gameState}
+                  playerState={gameState.player1}
+                  opponentDiscard={gameState.player2.discard}
+                  handleCardSelection={handleCardSelection}
+                  handleCardEffect={handleCardEffect}
+                  setGameState={setGameState}
+                  endFusion={endFusion}
+                  fusionState={fusionState}
+                  setFusionState={setFusionState}
+                  fusionMaterial={fusionMaterial}
+                  setFusionMaterial={setFusionMaterial}
+                  revealed={revealed}
+                />
+                <Player
+                  player={2}
+                  gameState={gameState}
+                  playerState={gameState.player2}
+                  opponentHealth={gameState.player1.health}
+                  opponentDiscard={gameState.player1.discard}
+                  handleCardSelection={handleCardSelection}
+                  setGameState={setGameState}
+                  endFusion={endFusion}
+                  fusionState={fusionState}
+                  setFusionState={setFusionState}
+                  fusionMaterial={fusionMaterial}
+                  setFusionMaterial={setFusionMaterial}
+                  initialAIPowerCards={initialAIPowerCards}
+                  setInitialAIPowerCards={setInitialAIPowerCards}
+                  revealed={revealed}
+                />
               </div>
-              <Player
-                player={1}
-                gameState={gameState}
-                playerState={gameState.player1}
-                opponentDiscard={gameState.player2.discard}
-                handleCardSelection={handleCardSelection}
-                handleCardEffect={handleCardEffect}
-                setGameState={setGameState}
-                endFusion={endFusion}
-                fusionState={fusionState}
-                setFusionState={setFusionState}
-                fusionMaterial={fusionMaterial}
-                setFusionMaterial={setFusionMaterial}
-                revealed={revealed}
-              />
-              <Player
-                player={2}
-                gameState={gameState}
-                playerState={gameState.player2}
-                opponentHealth={gameState.player1.health}
-                opponentDiscard={gameState.player1.discard}
-                handleCardSelection={handleCardSelection}
-                setGameState={setGameState}
-                endFusion={endFusion}
-                fusionState={fusionState}
-                setFusionState={setFusionState}
-                fusionMaterial={fusionMaterial}
-                setFusionMaterial={setFusionMaterial}
-                initialAIPowerCards={initialAIPowerCards}
-                setInitialAIPowerCards={setInitialAIPowerCards}
-                revealed={revealed}
-              />
-            </div>
-          </section>
+            </MouseParallaxChild>
+          </MouseParallaxContainer>
         </div>
 
         <EndGameModal

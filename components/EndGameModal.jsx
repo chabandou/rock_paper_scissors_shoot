@@ -66,7 +66,7 @@ export default function EndGameModal({
           height={720}
           className="absolute w-[33vw] bottom-[75vh]  z-40"
         />
-        <div className="modal-box h-[60vh] px-4 py-0 bg-gradient-to-b from-[#6DBECB] to-[#406E75] overflow-y-auto">
+        <div className="modal-box h-[60vh] px-4 py-0 bg-gradient-to-b from-[#6DBECB] to-[#406E75] overflow-y-auto endGameModelContent">
           <div className="relative space-y-5 m-0 p-4  bg-neutral overflow-y-auto">
             <h3
               className={clsx(
@@ -76,10 +76,10 @@ export default function EndGameModal({
             >
               {gameWinner === "Player 1" ? "You" : "Player 2"} Won The Game!
             </h3>
-            <div className="space-y-5 overflow-y-auto">
+            <div className="space-y-5 overflow-y-auto ">
               {gameWinner === "Player 1" ? (
                 <div>
-                  <p>Well Played, Congratulations.</p>{" "}
+                  <p className="font-bold">Well Played, Congratulations.</p>{" "}
                   <p>
                     Make sure to leave your opinion on the game and share it
                     with friends!
@@ -96,28 +96,39 @@ export default function EndGameModal({
               )}
 
               <p className="">During the game You played these cards:</p>
-              <div className="flex items-center gap-3 overflow-x-auto">
+              <div className="flex items-center gap-3 overflow-x-auto [scrollbar-width:none]">
                 {gameState.player1.discard.map((card, i) => {
                   return <Card name={card} revealed={true} index={i} />;
                 })}
               </div>
               <p className="">And your opponent played these cards:</p>
-              <div className="flex items-center gap-3 overflow-x-auto">
+              <div className="flex items-center gap-3 overflow-x-auto [scrollbar-width:none]">
                 {gameState.player2.discard.map((card, i) => {
                   return <Card name={card} revealed={true} index={i} />;
                 })}
               </div>
             </div>
             <div className="z-10 w-full max-w-5xl flex flex-col items-center justify-center">
-              <h2 className="text-3xl font-bold">Final Match Log</h2>
+              <h2 className="text-3xl font-bold my-3">Final Match Log</h2>
               {matchLog.map((match, i) => (
-                <h3 key={i}>{match}</h3>
+                <div
+                  className={clsx("w-full py-[2px] flex items-center justify-between", {
+                    "bg-neutral/10": i  % 2 === 0,
+                    "bg-white/10": i  % 2 !== 0,
+                  })}
+                >
+                  <span className="text-[1.3vw] font-normal" key={i}>{match.split(":")[0]}</span>
+                  <span className="text-[1.3vw] font-semibold text-[#73c8d5]" key={i}>{match.split(":")[1]}</span>
+                </div>
               ))}
             </div>
 
             <div className="modal-action">
               <form method="dialog">
-                <button className="btn hover:bg-[#62abb6] hover:text-neutral" onClick={() => resetGame()}>
+                <button
+                  className="btn hover:bg-[#62abb6] hover:text-neutral"
+                  onClick={() => resetGame()}
+                >
                   Play New Game
                 </button>
               </form>

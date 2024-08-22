@@ -1,4 +1,14 @@
 export const fusionCards = {
+  shoot: {
+    name: "shoot",
+    type: "power",
+    effect: "Beats all basic RPS Cards",
+  },
+  pan: {
+    name: "pan",
+    type: "power",
+    effect: "Protects against Shoot",
+  },
   rockshoot: {
     name: "slingshot",
     type: "fusion",
@@ -39,7 +49,7 @@ export const fusionCards = {
   dinner: {
     name: "dinner",
     type: "fusion",
-    effect: "Restore 2 HP & Draw 1 Card",
+    effect: "Gain 2 HP & Draw 1 Card",
   },
 };
 

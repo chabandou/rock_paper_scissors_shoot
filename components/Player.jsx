@@ -684,33 +684,53 @@ export default function Player({
       ? "/card-deck-only2.svg"
       : "/card-back2.svg";
 
+  const rotationClasses = [
+    "group-hover:rotate-15",
+    " group-hover:rotate-30",
+    " group-hover:rotate-45",
+  ];
+
   return (
     <>
-      <div
-        className={clsx(
-          "activeCard absolute top-1/2 translate-y-[-50%] -translate-x-1/2 z-0",
-          {
-            "left-[calc(50%+calc(10vw*0.74))]": player === 2,
-            "left-[calc(50%-calc(10vw*0.74))]": player === 1,
-          }
-        )}
-      >
-        {player === 1
-          ? gameState.player1.activeCard && (
-              <Card
-                name={activeCard}
-                position={"activeCard"}
-                revealed={revealed}
-              />
-            )
-          : gameState.player2.activeCard && (
-              <Card
-                name={activeCard}
-                position={"activeCard"}
-                revealed={revealed}
-              />
+      <AnimatePresence>
+        {activeCard && (
+          <motion.div
+            className={clsx(
+              "activeCard z-0"
+              // {
+              //   "left-[calc(50%+7.4vw)]": player === 2,
+              //   "left-[calc(50%-7.4vw)]": player === 1,
+              // }
             )}
-      </div>
+            initial={{
+              position: "absolute",
+              top: player === 1 ? "60%" : "40%",
+              transform: "translateY(-50%) translateX(-50%) scale(1.2)",
+              left: player === 1 ? "calc(50% - 7.5vw)" : "calc(50% + 7.5vw)",
+  
+            }}
+            animate={{
+              top: player === 1 ? "50%" : "50%",
+              transform: "translateY(-50%) translateX(-50%) scale(1)",
+              left: player === 1 ? "calc(50% - 7.5vw)" : "calc(50% + 7.5vw)",
+              transition: { duration: 0.45, delay: 0, ease: "circInOut" },
+            }}
+            exit={{
+              zIndex: 48,
+              top: player === 1 ? `calc(100% - 11.95vw)` : "0.7vw",
+              transform: "translateY(0%) translateX(0%)",
+              left: "0.7vw",
+              transition: { duration: 1.5, delay: 0, ease: "easeInOut" },
+            }}
+          >
+            <Card
+              name={activeCard}
+              position={"activeCard"}
+              revealed={revealed}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div
         className={cn("deck absolute aspect-[2/3] right-[calc(0.7vw)]", {
@@ -765,6 +785,7 @@ export default function Player({
                   startFusion={startFusion}
                   endFusion={endFusion}
                   fusionState={fusionState}
+                  activeCard={activeCard}
                   round={round}
                 />
               ))}
@@ -773,16 +794,72 @@ export default function Player({
         </div>
       </div>
       <div
-        className={clsx("health absolute left-1/4", {
-          "top-0": player === 2,
-          "bottom-0": player === 1,
+        className={clsx("health flex  gap-2 absolute left-[11vw]", {
+          "top-[0.7vw] items-start": player === 2,
+          "bottom-[0.7vw] items-end": player === 1,
         })}
       >
-        {health}
+        <span className="text-[#39df3e] font-semibold drop-shadow-[0_1px_0_black]">
+          {health}
+        </span>
+        <motion.div
+          className={cn("max-h-[11.5vw] flex flex-wrap rounded-3xl bg-black/10 border-2 border-[#239227] px-1 py-2", {
+            "flex-col-reverse": player === 1,
+            "flex-col": player === 2,
+          })}
+          animate={{
+            height: "fit-content",
+          }}
+          layout
+        >
+          <AnimatePresence>
+            {player === 1
+              ? Array.from({ length: health }, (point, index) => {
+                  return (
+                    <motion.div
+                      key={index}
+                      exit={{
+                        opacity: 0,
+                        y: player === 1 ? -15 : 15,
+                        transition: { duration: 0.3, delay: 0.2 },
+                      }}
+                    >
+                      <Image
+                        key={index}
+                        src="/heart.svg"
+                        alt="heart"
+                        width={30}
+                        height={30}
+                      />
+                    </motion.div>
+                  );
+                }).reverse()
+              : Array.from({ length: health }, (point, index) => {
+                  return (
+                    <motion.div
+                      key={index}
+                      exit={{
+                        opacity: 0,
+                        y: player === 1 ? -15 : 15,
+                        transition: { duration: 0.3, delay: 0.2 },
+                      }}
+                    >
+                      <Image
+                        key={index}
+                        src="/heart.svg"
+                        alt="heart"
+                        width={30}
+                        height={30}
+                      />
+                    </motion.div>
+                  );
+                })}
+          </AnimatePresence>
+        </motion.div>
       </div>
       <div
         className={clsx(
-          "playerDiscard group absolute w-[7.6vw] aspect-[2/3] left-[calc(0.7vw)] origin-bottom transition-all duration-500 ease-in-out hover:-rotate-[15deg] z-10",
+          "playerDiscard group absolute w-[7.6vw] aspect-[2/3] left-[calc(0.7vw)] transition-all duration-500 ease-in-out z-20 ",
           {
             "top-[calc(0.7vw)]": player === 2,
             "top-[calc(100%-0.7vw-11.25vw)]": player === 1,
@@ -794,13 +871,25 @@ export default function Player({
             .showModal()
         }
       >
-        <span className={clsx("absolute top-1 left-2 z-[5]")}>
+        <span className={clsx("absolute top-1 left-2 z-[20]")}>
           {playerDiscard.length}
         </span>
 
         {playerDiscard.map((card, i) => {
           return (
-            <Card name={card} position={"discard"} revealed={true} index={i} />
+            <div
+              className={cn(
+                "origin-center hover:cursor-pointer transition-transform duration-300 ease-in-out"
+                // rotationClasses[i % 3],
+              )}
+            >
+              <Card
+                name={card}
+                position={"discard"}
+                revealed={true}
+                index={i}
+              />
+            </div>
           );
         })}
         <dialog
@@ -822,7 +911,7 @@ export default function Player({
                 These are the cards that{" "}
                 {player === 1 ? "You" : "Your Oppenent"} have played:
               </p>
-              <div className="flex items-center gap-3 overflow-x-auto">
+              <div className="flex items-center gap-3 overflow-x-auto [scrollbar-width:none]">
                 {playerDiscard.map((card, i) => {
                   return <Card name={card} revealed={true} index={i} />;
                 })}
@@ -848,6 +937,7 @@ function Dropdown({
   handleCardEffect,
   startFusion,
   endFusion,
+  activeCard,
   round,
   key,
 }) {
@@ -858,6 +948,15 @@ function Dropdown({
   const cardGap = 0;
   let cardSpace = hand.length * cardWidth + cardGap * (hand.length - 1);
   let card1Right = (fieldWidth - cardSpace) / 2;
+
+  const [willReveal, setWillReveal] = useState(false);
+
+  setTimeout(() => {
+    if (player === 1) {
+      setWillReveal(true);
+    }
+  }, (hand.length - index - 1) * 400 + 150);
+
   return (
     <motion.div
       key={key}
@@ -884,7 +983,14 @@ function Dropdown({
             : `${
                 card1Right + (cardWidth + cardGap) * (hand.length - index - 1)
               }vw`,
-        transition: { duration: 0.3, ease: "easeOut", delay: round === 1 && (0.3 * (hand.length - index - 1)) },
+        transition: {
+          duration:
+            round === 1 && !activeCard
+              ? 0.3 + 0.2 * (hand.length - index - 1)
+              : 0.3,
+          ease: "easeOut",
+          delay: round === 1 && 0.3 * (hand.length - index - 1),
+        },
       }}
       exit={{
         scale: 1,
@@ -907,14 +1013,14 @@ function Dropdown({
           endFusion(e, index, player);
         }}
       >
-        <Card name={card} revealed={player === 1 && true}  position={"hand"} />
+        <Card name={card} revealed={willReveal} position={"hand"} />
       </div>
       <ul
         tabIndex={0}
         className={clsx(
-          "dropdown-content menu bg-base-100 rounded-box w-auto p-2 shadow z-50",
+          "dropdown-content menu w-full bg-base-100 rounded-box p-1 shadow z-50",
           {
-            hidden: fusionState.player1,
+            hidden: fusionState.player1 || activeCard,
           }
         )}
       >
