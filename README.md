@@ -1,36 +1,35 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+## Introduction to Rock, Paper, Scissors, SHOOT!
 
-First, run the development server:
+Rock, Paper, Scissors, SHOOT! is a twist on the classic game of Rock, Paper, Scissors. So the same rules you already know apply in this game too.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+![classic RPS](https://rock-paper-scissors-shoot-beta.vercel.app/how-to-play/classic-rps.svg)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## It's Card Game:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+In this game each player gets a deck of 10 cards:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+6 of them are the classic (Basic) Rock, Paper, Scissors, two of each represented as playing cards
+The 4 others are special cards called Power-Cards that are specific to this game.
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## The ❝Power❞ of the Power-Cards:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Power-Cards can be two types "Shoot" & "Pan" (yes, the kitchen utensil, clearly I was hungry when I came up with this).
+Shoot card can beat all basic RPS cards, but you have to be carful because it can be countered by the Pan card and causes reverse damage.
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+![Power cards](https://rock-paper-scissors-shoot-beta.vercel.app/how-to-play/RPSS-dynamics.svg)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Flow of the Game & Goal:
+
+The game plays in rounds, each round the player and their opponent both choose a card to play (choose the play button on a card's menu to play it) similar to choosing a rock, paper or scissors in classic RPS, the cards are then revealed on the field and the player with the more poweful card wins that round and deals damage to the loser's health points.
+
+Most cards deal 1 damage but "Shoot" fusions (more on fusions below) deal 2 or more damage.
+The game is won if you deplete your opponent's health to 0 or get them to run out of cards.
+
+![Power cards](https://rock-paper-scissors-shoot-beta.vercel.app/how-to-play/game-screenshot-min.png)
+
+Game developed by chabandou as submission for the JSM coding challenge.

@@ -172,6 +172,13 @@ export default function HowToPlayModal() {
             The game is won if you deplete your opponent's health to 0 or get
             them to run out of cards.
           </p>
+          <Image
+            src="/how-to-play/game-screenshot-min.png"
+            alt="game screenshot"
+            className="mx-auto"
+            width={1080}
+            height={720}
+          />
           <h2
             className={cn(
               ubuntu.className,
