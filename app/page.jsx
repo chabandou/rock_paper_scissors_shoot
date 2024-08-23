@@ -32,7 +32,9 @@ export default function Home() {
 
   const [gameStarted, setGameStarted] = useState(false);
 
-  let cardPlayedTime; 
+  const [cardPlayedTime, setCardPlayedTime] = useState(null);
+
+  let time;
 
   /// Power Cards logic
 
@@ -233,53 +235,67 @@ export default function Home() {
       }
     }
 
-    let timeElapsed = Date.now() - cardPlayedTime;
+    function player2Pass() {
+      let timeElapsed = Date.now() - cardPlayedTime;
 
-    if (player1Card && !player2Card && timeElapsed > 1500) {
-      let player1CardLogDisplay = fusionCards[player1Card]?.name
-        ? fusionCards[player1Card]?.name
-        : player1Card;
-      setRevealed(true);
-      setTimeout(() => {
+      if (player1Card && !player2Card && timeElapsed > 1500) {
+        let player1CardLogDisplay = fusionCards[player1Card]?.name
+          ? fusionCards[player1Card]?.name
+          : player1Card;
+        setRevealed(true);
         setTimeout(() => {
-          matchLog.push(
-            "Round #" +
-              gameState.round +
-              ": " +
-              player1CardLogDisplay +
-              " vs. Player 2 Pass"
-          );
-          setMatchLog(matchLog);
-
-          // let newGameState = { ...gameState };
-
-          if (player1Card === "rifle") {
-            gameState.player2.health -= 3;
-          } else if (player1Card.includes("shoot") && player1Card.length > 5) {
-            gameState.player2.health -= 2;
-          } else {
-            gameState.player2.health -= 1;
-          }
-          setRoundWinner("player 1");
-
-          gameState.round += 1;
-
-          // Remove the cards from the active cards
-          gameState.player1.activeCard = null;
-
           setTimeout(() => {
-            // Add the cards to the discard pile
-            gameState.player1.discard.push(player1Card);
-            drawCard("player1");
-            drawCard("player2");
-            setGameState({ ...gameState });
-            setRoundWinner(null);
-            setRevealed(false);
-          }, 1500);
-        }, 1000);
-      }, 3000);
+            matchLog.push(
+              "Round #" +
+                gameState.round +
+                ": " +
+                player1CardLogDisplay +
+                " vs. Player 2 Pass"
+            );
+            setMatchLog(matchLog);
+
+            // let newGameState = { ...gameState };
+
+            if (player1Card === "rifle") {
+              gameState.player2.health -= 3;
+            } else if (
+              player1Card.includes("shoot") &&
+              player1Card.length > 5
+            ) {
+              gameState.player2.health -= 2;
+            } else {
+              gameState.player2.health -= 1;
+            }
+            setRoundWinner("player 1");
+
+            gameState.round += 1;
+
+            // Remove the cards from the active cards
+            gameState.player1.activeCard = null;
+
+            setTimeout(() => {
+              // Add the cards to the discard pile
+              gameState.player1.discard.push(player1Card);
+              drawCard("player1");
+              drawCard("player2");
+              setGameState({ ...gameState });
+              setRoundWinner(null);
+              setRevealed(false);
+              setCardPlayedTime(null);
+            }, 1500);
+          }, 1000);
+        }, 3000);
+      }
     }
-  }, [gameState.player1.activeCard, gameState.player2.activeCard, cardPlayedTime]);
+
+    setTimeout(() => {
+      player2Pass();
+    }, 2000);
+  }, [
+    gameState.player1.activeCard,
+    gameState.player2.activeCard,
+    cardPlayedTime,
+  ]);
 
   function handlePanCounter(player) {
     if (player === 1) {
@@ -335,7 +351,7 @@ export default function Home() {
       setGameState({
         ...gameState,
       });
-      cardPlayedTime = Date.now();
+      setCardPlayedTime(Date.now());
     } else {
       gameState.player2.activeCard = gameState.player2.hand[cardIndex];
       gameState.player2.hand = gameState.player2.hand.filter(
