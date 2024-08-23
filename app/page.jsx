@@ -31,10 +31,9 @@ export default function Home() {
   const [revealed, setRevealed] = useState(false);
 
   const [gameStarted, setGameStarted] = useState(false);
-
   const [cardPlayedTime, setCardPlayedTime] = useState(null);
 
-  let time;
+  const [timeOffset, setTimeOffset] = useState(false);
 
   /// Power Cards logic
 
@@ -234,11 +233,16 @@ export default function Home() {
         setTimeout(() => playRound(player1Card, player2Card), 3000);
       }
     }
+  }, [gameState.player1.activeCard, gameState.player2.activeCard]);
 
-    function player2Pass() {
-      let timeElapsed = Date.now() - cardPlayedTime;
+  useEffect(() => {
+    setTimeout(() => {
+      let player1Card = gameState.player1.activeCard;
+      let player2Card = gameState.player2.activeCard;
 
-      if (player1Card && !player2Card && timeElapsed > 1500) {
+      console.log("timeElapsed", timeOffset);
+
+      if (player1Card && !player2Card) {
         let player1CardLogDisplay = fusionCards[player1Card]?.name
           ? fusionCards[player1Card]?.name
           : player1Card;
@@ -281,21 +285,12 @@ export default function Home() {
               setGameState({ ...gameState });
               setRoundWinner(null);
               setRevealed(false);
-              setCardPlayedTime(null);
             }, 1500);
           }, 1000);
         }, 3000);
       }
-    }
-
-    setTimeout(() => {
-      player2Pass();
-    }, 2000);
-  }, [
-    gameState.player1.activeCard,
-    gameState.player2.activeCard,
-    cardPlayedTime,
-  ]);
+    }, 4000);
+  }, [gameState.player1.activeCard, gameState.player2.activeCard]);
 
   function handlePanCounter(player) {
     if (player === 1) {
@@ -351,7 +346,6 @@ export default function Home() {
       setGameState({
         ...gameState,
       });
-      setCardPlayedTime(Date.now());
     } else {
       gameState.player2.activeCard = gameState.player2.hand[cardIndex];
       gameState.player2.hand = gameState.player2.hand.filter(
