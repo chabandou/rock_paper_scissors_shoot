@@ -55,7 +55,7 @@ export default function EndGameModal({
   return (
     <>
       <button
-        className="btn z-10"
+        className="btn z-10 hidden"
         onClick={() => document.getElementById("endGameModal").showModal()}
       >
         open modal
