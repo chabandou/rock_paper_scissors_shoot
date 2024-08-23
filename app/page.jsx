@@ -93,15 +93,7 @@ export default function Home() {
       });
     }
 
-    // if (player === "player1") {
-    //   console.log(
-    //     "from after drawCard Fn \n",
-    //     "hand:",
-    //     gameState.player1.hand,
-    //     "\n deck:",
-    //     gameState.player1.deck
-    //   );
-    // }
+  
   }
 
   function roundSetup() {
@@ -193,7 +185,6 @@ export default function Home() {
   const [roundWinner, setRoundWinner] = useState(null);
 
   useEffect(() => {
-    // console.log("from before playRound and pan used: \n", gameState.player1.hand);
 
     let player1Card = gameState.player1.activeCard;
     let player2Card = gameState.player2.activeCard;
@@ -318,15 +309,8 @@ export default function Home() {
       setGameState({
         ...gameState,
       });
-      // console.log(
-      //   "from after handleCardSelection Fn \n",
-      //   "hand:",
-      //   gameState.player1.hand,
-      //   "\n deck:",
-      //   gameState.player1.deck
-      // );
+   
     } else {
-      console.log("handling card selection for player 2");
 
       gameState.player2.activeCard = gameState.player2.hand[cardIndex];
       gameState.player2.hand = gameState.player2.hand.filter(
@@ -341,21 +325,10 @@ export default function Home() {
         },
       });
 
-      console.log(
-        "handled card selection for player 2",
-        gameState.player2.activeCard
-      );
     }
   };
 
   function playRound(player1Card, player2Card) {
-    // console.log(
-    //   "from before playRound Fn \n",
-    //   "hand:",
-    //   gameState.player1.hand,
-    //   "\n deck:",
-    //   gameState.player1.deck
-    // );
 
     let player1CardLogDisplay = fusionCards[player1Card]?.name
       ? fusionCards[player1Card].name
@@ -383,7 +356,6 @@ export default function Home() {
         player2Card.includes("pan") &&
         player2Card.length > 3)
     ) {
-      console.log("It's a tie!");
       setRoundWinner("tie");
     } else if (
       (player1Card === "rock" && player2Card === "scissors") ||
@@ -475,12 +447,7 @@ export default function Home() {
       setRoundWinner(null);
       setRevealed(false);
     }, 1500);
-    // console.log(
-    //   "player1 hand",
-    //   gameState.player1.hand,
-    //   "player2 hand",
-    //   gameState.player2.hand
-    // );
+ 
   }
 
   function handleCardEffect(player, card, index) {
@@ -517,8 +484,7 @@ export default function Home() {
   });
 
   async function endFusion(e, index, player) {
-    console.log("endFusion TRIGGERED ****************");
-    // console.log(e?.target.alt);
+
     let card2 =
       player === 1
         ? { card: e?.target.alt, index: index }
@@ -560,7 +526,6 @@ export default function Home() {
             card1.card === "paper" ||
             card1.card === "scissors"))
       ) {
-        console.log("PAN FUSION TRIGGERED ****************");
         player === 1
           ? (gameState.player1.hand = gameState.player1.hand.filter(
               (card, i) => i !== card1.index && i !== card2.index
@@ -574,12 +539,10 @@ export default function Home() {
             card2.card === "paper" ||
             card2.card === "scissors")
         ) {
-          console.log("PAN FUSION TRIGGERED 2222 ****************");
           player === 1
             ? gameState.player1.hand.push(card2.card + "pan")
             : gameState.player2.hand.push(card2.card + "pan");
         } else {
-          console.log("PAN FUSION TRIGGERED 3333 ****************");
 
           player === 1
             ? gameState.player1.hand.push(card1.card + "pan")
@@ -778,6 +741,7 @@ export default function Home() {
                 </span>{" "}
                 <Image
                   src="/start-game.svg"
+                  alt="start-game"
                   className="relative w-[6.7vw] -translate-y-[0.5vw] group-hover:scale-125 origin-bottom group-hover:rotate-12 group-hover:-translate-y-4 transition-all duration-500 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1);]"
                   width={100}
                   height={80}

@@ -14,6 +14,7 @@ export default function HowToPlayModal() {
           <span className="text-[1.5vw] font-extrabold">How to Play</span>{" "}
           <Image
             src="/question-dice.svg"
+            alt="question-dice"
             className="group-hover:scale-125 w-[4.7vw] origin-bottom group-hover:rotate-12 group-hover:-translate-y-4 transition-all duration-500 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1);]"
             width={70}
             height={70}
@@ -83,36 +84,36 @@ export default function HowToPlayModal() {
           <ul className="">
             <li className="group flex items-start py-1 ms-3">
               <svg
-                width="3"
-                height="24"
+                width={3}
+                height={24}
+                className="mr-2 text-white overflow-visible"
                 viewBox="0 -9 3 24"
-                class="mr-2 text-white overflow-visible "
               >
                 <path
-                  d="M0 0L3 3L0 6"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                ></path>
+                  strokeLinecap="round"
+                  strokeWidth={1.5}
+                  d="m0 0 3 3-3 3"
+                />
               </svg>
-              6 of them are the classic (Basic) Rock, Paper, Scissors, two of each
-              represented as playing cards
+              6 of them are the classic (Basic) Rock, Paper, Scissors, two of
+              each represented as playing cards
             </li>
             <li className="group flex items-start py-1 ms-3">
               <svg
-                width="3"
-                height="24"
+                width={3}
+                height={24}
+                className="mr-2 text-white overflow-visible"
                 viewBox="0 -9 3 24"
-                class="mr-2 text-white overflow-visible "
               >
                 <path
-                  d="M0 0L3 3L0 6"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                ></path>
+                  strokeLinecap="round"
+                  strokeWidth={1.5}
+                  d="m0 0 3 3-3 3"
+                />
               </svg>
               The 4 others are special cards called Power-Cards that are
               specific to this game.

@@ -112,14 +112,10 @@ export default function Player({
             return index;
           }
           let indexOfFusionCard2 = getCard2Index(gameState.player2.hand);
-          // console.log(hand[indexOfFusionCard1], hand[indexOfFusionCard2]);
 
           startFusion(hand[indexOfFusionCard1], indexOfFusionCard1, 2);
 
-          // fusionMaterial.card2 = {
-          //   card: hand[indexOfFusionCard2],
-          //   index: indexOfFusionCard2,
-          // };
+        
           endFusion(
             gameState.player2.hand[indexOfFusionCard2],
             indexOfFusionCard2,
@@ -150,13 +146,7 @@ export default function Player({
             2
           );
 
-          console.log(
-            fusionCard1Index,
-            gameState.player2.hand[fusionCard1Index],
-            fusionCard2Index,
-            gameState.player2.hand[fusionCard2Index]
-          );
-
+       
           setTimeout(() => selectRandomCard(), 500);
         } else if (
           cardsCounter(gameState.player2.hand).shoot > 1 &&
@@ -207,11 +197,8 @@ export default function Player({
           gameState.player2.hand[randIndex] !== "pan" &&
           gameState.player2.hand[randIndex] !== "dinner"
         ) {
-          console.log("selecting random card");
-          console.log(gameState.player2.hand[randIndex]);
 
           handleCardSelection(2, randIndex);
-          console.log("selected random card");
         } else {
           selectRandomCard();
         }
@@ -273,13 +260,7 @@ export default function Player({
             2
           );
 
-          console.log(
-            fusionCard1Index,
-            gameState.player2.hand[fusionCard1Index],
-            fusionCard2Index,
-            gameState.player2.hand[fusionCard2Index]
-          );
-
+    
           setTimeout(() => chooseBasedOnProb(), 500);
         } else if (cardsCounter(gameState.player2.hand).shoot > 1) {
           let fusionCard1Index = gameState.player2.hand.indexOf("shoot");
@@ -324,7 +305,6 @@ export default function Player({
               return index;
             }
             let indexOfFusionCard2 = getCard2Index(gameState.player2.hand);
-            // console.log(hand[indexOfFusionCard1], hand[indexOfFusionCard2]);
 
             startFusion(
               gameState.player2.hand[indexOfFusionCard1],
@@ -353,7 +333,6 @@ export default function Player({
               return index;
             }
             let indexOfFusionCard2 = getCard2Index(gameState.player2.hand);
-            // console.log(hand[indexOfFusionCard1], hand[indexOfFusionCard2]);
 
             startFusion(
               gameState.player2.hand[indexOfFusionCard1],
@@ -419,7 +398,6 @@ export default function Player({
               bestCardProbability = probability;
             }
           }
-          console.log(bestCard, bestCardProbability);
 
           let indexOfCardToSelect = gameState.player2.hand.indexOf(bestCard);
           handleCardSelection(2, indexOfCardToSelect);
@@ -452,13 +430,7 @@ export default function Player({
             2
           );
 
-          console.log(
-            fusionCard1Index,
-            hand[fusionCard1Index],
-            fusionCard2Index,
-            hand[fusionCard2Index]
-          );
-
+      
           setTimeout(() => chooseBasedOnCounter(), 500);
         } else if (cardsCounter(gameState.player2.hand).shoot > 1) {
           let fusionCard1Index = gameState.player2.hand.indexOf("shoot");
@@ -507,7 +479,6 @@ export default function Player({
               return index;
             }
             let indexOfFusionCard2 = getCard2Index(gameState.player2.hand);
-            // console.log(hand[indexOfFusionCard1], hand[indexOfFusionCard2]);
 
             startFusion(
               gameState.player2.hand[indexOfFusionCard1],
@@ -536,7 +507,6 @@ export default function Player({
               return index;
             }
             let indexOfFusionCard2 = getCard2Index(gameState.player2.hand);
-            // console.log(hand[indexOfFusionCard1], hand[indexOfFusionCard2]);
 
             startFusion(
               gameState.player2.hand[indexOfFusionCard1],
@@ -829,6 +799,7 @@ export default function Player({
                         alt="heart"
                         width={30}
                         height={30}
+                        className="w-[2vw]"
                       />
                     </motion.div>
                   );
@@ -849,6 +820,7 @@ export default function Player({
                         alt="heart"
                         width={30}
                         height={30}
+                        className="w-[2vw]"
                       />
                     </motion.div>
                   );
