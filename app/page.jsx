@@ -127,18 +127,64 @@ export default function Home() {
       roundSetup();
     }
 
-    if (gameState.player1.health <= 0) {
+    if (
+      gameState.player1.health <= 0 ||
+      (gameState.player1.deck.length === 0 &&
+        (gameState.player1.hand.length === 0 ||
+          (gameState.player1.hand.length === 1 &&
+            gameState.player1.hand[0] === "pan")) &&
+        (gameState.player2.deck.length > 0 || (gameState.player2.hand.length > 0 && gameState.player2.hand[0] !== "pan")) && !gameState.player1.activeCard)
+    ) {
       setGameWinner("Player 2");
+      setGameStarted(false);
       document.getElementById("endGameModal").showModal();
-    } else if (gameState.player2.health <= 0) {
+    } else if (
+      gameState.player2.health <= 0 ||
+      (gameState.player2.deck.length === 0 &&
+        (gameState.player2.hand.length === 0 ||
+          (gameState.player2.hand.length === 1 &&
+            gameState.player2.hand[0] === "pan")) &&
+        (gameState.player1.deck.length > 0 || (gameState.player1.hand.length > 0 && gameState.player1.hand[0] !== "pan")) && !gameState.player2.activeCard)
+    ) {
       setGameWinner("Player 1");
+      setGameStarted(false);
       document.getElementById("endGameModal").showModal();
+    } else if (
+      gameState.player2.deck.length === 0 &&
+      gameState.player1.deck.length === 0
+    ) {
+      if (
+        gameState.player2.hand.length === 0 ||
+        (gameState.player2.hand.length === 1 && gameState.player2.hand[0] === "pan")
+      ) {
+        if (
+          gameState.player1.hand.length === 0 ||
+          (gameState.player1.hand.length === 1 && gameState.player1.hand[0] === "pan")
+        ) {
+          if (gameState.player1.health > gameState.player2.health) {
+            setGameWinner("Player 1");
+            setGameStarted(false);
+            document.getElementById("endGameModal").showModal();
+          } else if (gameState.player2.health > gameState.player1.health) {
+            setGameWinner("Player 2");
+            setGameStarted(false);
+            document.getElementById("endGameModal").showModal();
+          } else {
+            setGameWinner("It's a Draw!");
+            setGameStarted(false);
+            document.getElementById("endGameModal").showModal();
+          }
+        } 
+      }
     }
   }, [
     gameState.round,
     gameState.player1.health,
     gameState.player2.health,
     gameState.player1.deck.length,
+    gameState.player2.deck.length,
+    gameState.player1.hand,
+    gameState.player2.hand,
     gameStarted,
   ]);
 
@@ -173,6 +219,9 @@ export default function Home() {
       }
     }
     if (player1Card && !player2Card) {
+      let player1CardLogDisplay = fusionCards[player1Card]?.name
+        ? fusionCards[player1Card]?.name
+        : player1Card;
       setRevealed(true);
       setTimeout(() => {
         setTimeout(() => {
@@ -180,7 +229,7 @@ export default function Home() {
             "Round #" +
               gameState.round +
               ": " +
-              fusionCards[player1Card]?.name +
+              player1CardLogDisplay +
               " vs. Player 2 Pass"
           );
           setMatchLog(matchLog);
@@ -893,6 +942,7 @@ export default function Home() {
                   initialAIPowerCards={initialAIPowerCards}
                   setInitialAIPowerCards={setInitialAIPowerCards}
                   revealed={revealed}
+                  gameStarted={gameStarted}
                 />
               </div>
             </MouseParallaxChild>
@@ -907,6 +957,7 @@ export default function Home() {
           initializeDeck={initializeDeck}
           matchLog={matchLog}
           setMatchLog={setMatchLog}
+          setGameStarted={setGameStarted}
         />
       </div>
     </main>

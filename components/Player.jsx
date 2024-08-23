@@ -5,6 +5,7 @@ import Card from "./animata/Card";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { ubuntu } from "@/app/font";
+import HandCard from "./HandCard";
 
 export default function Player({
   player,
@@ -22,6 +23,7 @@ export default function Player({
   setFusionMaterial,
   initialAIPowerCards,
   revealed,
+  gameStarted,
 }) {
   let {
     hand,
@@ -33,6 +35,7 @@ export default function Player({
 
   let { round } = gameState;
 
+ 
   // FUSION FUNCTIONS //
 
   function startFusion(card, index, player) {
@@ -63,6 +66,7 @@ export default function Player({
       }
     }
     useEffect(() => {
+      if (gameStarted) {
       // get all cards in hand
 
       // If AI has cards, AI will calculate the probability of remaining opponent cards
@@ -673,7 +677,8 @@ export default function Player({
 
         return cardProbabilities;
       }
-    }, [round]);
+    }
+    }, [round, gameStarted]);
   }
 
   // const cardRefs = hand.map((_, i) => useRef());
@@ -767,14 +772,9 @@ export default function Player({
       >
         <div className="hand flex items-center justify-center gap-2">
           <AnimatePresence mode="sync">
-            <motion.div
-              animate={{
-                opacity: 1,
-                transition: { staggerChildren: 0.1, delayChildren: 0.3 },
-              }}
-            >
+           
               {hand.map((card, index) => (
-                <Dropdown
+                <HandCard
                   key={index}
                   card={card}
                   index={index}
@@ -789,7 +789,6 @@ export default function Player({
                   round={round}
                 />
               ))}
-            </motion.div>
           </AnimatePresence>
         </div>
       </div>
@@ -927,130 +926,4 @@ export default function Player({
   );
 }
 
-function Dropdown({
-  card,
-  index,
-  player,
-  hand,
-  fusionState,
-  handleCardSelection,
-  handleCardEffect,
-  startFusion,
-  endFusion,
-  activeCard,
-  round,
-  key,
-}) {
-  const fieldWidth =
-    (document.querySelector(".field")?.offsetWidth * 7.5) / 112;
-  console.log(fieldWidth);
-  const cardWidth = 10;
-  const cardGap = 0;
-  let cardSpace = hand.length * cardWidth + cardGap * (hand.length - 1);
-  let card1Right = (fieldWidth - cardSpace) / 2;
 
-  const [willReveal, setWillReveal] = useState(false);
-
-  setTimeout(() => {
-    if (player === 1) {
-      setWillReveal(true);
-    }
-  }, (hand.length - index - 1) * 400 + 150);
-
-  return (
-    <motion.div
-      key={key}
-      whileHover={{
-        scale: 1.3,
-        translateY: player === 1 ? "15%" : "25%",
-        transition: { duration: 0.1, ease: "linear" },
-      }}
-      // whileTap={{ scale: 0.9 }}
-      initial={{
-        position: "absolute",
-        scale: 1.1,
-        translateY: 0,
-        right: "0.7vw",
-        bottom: player === 1 && "0.7vw",
-        top: player === 2 && "0.7vw",
-      }}
-      animate={{
-        scale: 1.2,
-        translateY: player === 1 ? "50%" : "-50%",
-        right:
-          index === hand.length - 1
-            ? `${card1Right}vw`
-            : `${
-                card1Right + (cardWidth + cardGap) * (hand.length - index - 1)
-              }vw`,
-        transition: {
-          duration:
-            round === 1 && !activeCard
-              ? 0.3 + 0.2 * (hand.length - index - 1)
-              : 0.3,
-          ease: "easeOut",
-          delay: round === 1 && 0.3 * (hand.length - index - 1),
-        },
-      }}
-      exit={{
-        scale: 1,
-        right: player === 1 ? `calc(50% + 7.5vw)` : `calc(50% - 15vw)`,
-        top: player === 2 && "50%",
-        bottom: player === 1 && "50%",
-        translateY: player === 1 ? "50%" : "-50%",
-        translateX: player === 1 ? "50%" : "-50%",
-        rotateY: player === 1 ? "180deg" : "0deg",
-        transition: { duration: 0.2, ease: "linear" },
-      }}
-      className={clsx(
-        "dropdown dropdown-top dropdown-hover transition-all duration-300 ease-in-out z-50"
-      )}
-    >
-      <div
-        className=""
-        role="button"
-        onClick={(e) => {
-          endFusion(e, index, player);
-        }}
-      >
-        <Card name={card} revealed={willReveal} position={"hand"} />
-      </div>
-      <ul
-        tabIndex={0}
-        className={clsx(
-          "dropdown-content menu w-full bg-base-100 rounded-box p-1 shadow z-50",
-          {
-            hidden: fusionState.player1 || activeCard,
-          }
-        )}
-      >
-        <li>
-          <button
-            onClick={() => {
-              card !== "pan" &&
-                card !== "dinner" &&
-                handleCardSelection(player, index),
-                card === "dinner"
-                  ? handleCardEffect(player, card, index)
-                  : null;
-            }}
-            className={clsx({
-              "btn-disabled text-slate-600": card === "pan",
-            })}
-          >
-            Play
-          </button>
-        </li>
-        <li>
-          <a
-            onClick={() => {
-              startFusion(card, index, player);
-            }}
-          >
-            Fuse
-          </a>
-        </li>
-      </ul>
-    </motion.div>
-  );
-}

@@ -15,6 +15,7 @@ export default function EndGameModal({
   initializeDeck,
   matchLog,
   setMatchLog,
+  setGameStarted,
 }) {
   function resetGame() {
     gameState.round = 0;
@@ -35,7 +36,7 @@ export default function EndGameModal({
     setGameState({ ...gameState });
     setGameWinner("");
     setMatchLog([]);
-
+    setGameStarted(true);
     document.getElementById("endGameModal").close();
   }
 
@@ -74,12 +75,12 @@ export default function EndGameModal({
                 "font-bold text-[1.75vw] px-5 py-2 bg-white/5 rounded-full text-center mt-8"
               )}
             >
-              {gameWinner === "Player 1" ? "You" : "Player 2"} Won The Game!
+              {gameWinner !== "It's a Draw!" ? <span>{gameWinner === "Player 1" ? "You" : "Your Opponent"} Won The Game!</span> : <span>It's a Draw!</span>}
             </h3>
             <div className="space-y-5 overflow-y-auto ">
-              {gameWinner === "Player 1" ? (
+              {gameWinner === "Player 1" || gameWinner === "It's a Draw!" ? (
                 <div>
-                  <p className="font-bold">Well Played, Congratulations.</p>{" "}
+                  <p className="font-bold">Well Played, {gameWinner === "Player 1" ? "Congratulations." : "You got a draw!"}</p>{" "}
                   <p>
                     Make sure to leave your opinion on the game and share it
                     with friends!
@@ -123,8 +124,8 @@ export default function EndGameModal({
               ))}
             </div>
 
-            <div className="modal-action">
-              <form method="dialog">
+            <div className="modal-action ">
+              <form method="dialog ">
                 <button
                   className="btn hover:bg-[#62abb6] hover:text-neutral"
                   onClick={() => resetGame()}
