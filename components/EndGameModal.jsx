@@ -16,6 +16,7 @@ export default function EndGameModal({
   matchLog,
   setMatchLog,
   setGameStarted,
+  gameStarted,
 }) {
   function resetGame() {
     gameState.round = 0;
@@ -54,7 +55,7 @@ export default function EndGameModal({
   return (
     <>
       <button
-        className="btn z-10 hidden"
+        className="btn z-10"
         onClick={() => document.getElementById("endGameModal").showModal()}
       >
         open modal
@@ -67,20 +68,32 @@ export default function EndGameModal({
           height={720}
           className="absolute w-[33vw] bottom-[75vh]  z-40"
         />
-        <div className="modal-box h-[60vh] px-4 py-0 bg-gradient-to-b from-[#6DBECB] to-[#406E75] overflow-y-auto endGameModelContent">
-          <div className="relative space-y-5 m-0 p-4  bg-neutral overflow-y-auto">
+        {!gameStarted && <div className="modal-box h-[60vh] px-4 py-0 bg-gradient-to-b from-[#6DBECB] to-[#406E75] endGameModelContent">
+          <div className="modal-content relative space-y-5 m-0 p-4 bg-neutral  ">
             <h3
               className={clsx(
                 ubuntu.className,
                 "font-bold text-[1.75vw] px-5 py-2 bg-white/5 rounded-full text-center mt-8"
               )}
             >
-              {gameWinner !== "It's a Draw!" ? <span>{gameWinner === "Player 1" ? "You" : "Your Opponent"} Won The Game!</span> : <span>It's a Draw!</span>}
+              {gameWinner !== "It's a Draw!" ? (
+                <span>
+                  {gameWinner === "Player 1" ? "You" : "Your Opponent"} Won The
+                  Game!
+                </span>
+              ) : (
+                <span>It's a Draw!</span>
+              )}
             </h3>
             <div className="space-y-5 overflow-y-auto ">
               {gameWinner === "Player 1" || gameWinner === "It's a Draw!" ? (
                 <div>
-                  <p className="font-bold">Well Played, {gameWinner === "Player 1" ? "Congratulations." : "You got a draw!"}</p>{" "}
+                  <p className="font-bold">
+                    Well Played,{" "}
+                    {gameWinner === "Player 1"
+                      ? "Congratulations."
+                      : "You got a draw!"}
+                  </p>{" "}
                   <p>
                     Make sure to leave your opinion on the game and share it
                     with friends!
@@ -99,13 +112,13 @@ export default function EndGameModal({
               <p className="">During the game You played these cards:</p>
               <div className="flex items-center gap-3 overflow-x-auto [scrollbar-width:none]">
                 {gameState.player1.discard.map((card, i) => {
-                  return <Card name={card} revealed={true} index={i} />;
+                  return <Card key={i+1} name={card} revealed={true} index={i} />;
                 })}
               </div>
               <p className="">And your opponent played these cards:</p>
               <div className="flex items-center gap-3 overflow-x-auto [scrollbar-width:none]">
                 {gameState.player2.discard.map((card, i) => {
-                  return <Card name={card} revealed={true} index={i} />;
+                  return <Card key={i} name={card} revealed={true} index={i} />;
                 })}
               </div>
             </div>
@@ -113,13 +126,23 @@ export default function EndGameModal({
               <h2 className="text-3xl font-bold my-3">Final Match Log</h2>
               {matchLog.map((match, i) => (
                 <div
-                  className={clsx("w-full py-[2px] flex items-center justify-between", {
-                    "bg-neutral/10": i  % 2 === 0,
-                    "bg-white/10": i  % 2 !== 0,
-                  })}
+                  key={i}
+                  className={clsx(
+                    "w-full py-[2px] flex items-center justify-between",
+                    {
+                      "bg-neutral/10": i % 2 === 0,
+                      "bg-white/10": i % 2 !== 0,
+                    }
+                  )}
                 >
-                  <span className="text-[1.3vw] font-normal" key={i}>{match.split(":")[0]}</span>
-                  <span className="text-[1.3vw] font-semibold text-[#73c8d5]" key={i}>{match.split(":")[1]}</span>
+                  <span className="text-[1.3vw] font-normal" key={i}>
+                    {match.split(":")[0]}
+                  </span>
+                  <span
+                    className="text-[1.3vw] font-semibold text-[#73c8d5]"
+                  >
+                    {match.split(":")[1]}
+                  </span>
                 </div>
               ))}
             </div>
@@ -135,7 +158,7 @@ export default function EndGameModal({
               </form>
             </div>
           </div>
-        </div>
+        </div>}
       </dialog>
     </>
   );

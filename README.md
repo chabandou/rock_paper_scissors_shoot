@@ -30,6 +30,6 @@ The game plays in rounds, each round the player and their opponent both choose a
 Most cards deal 1 damage but "Shoot" fusions (more on fusions below) deal 2 or more damage.
 The game is won if you deplete your opponent's health to 0 or get them to run out of cards.
 
-![Power cards](https://rock-paper-scissors-shoot-beta.vercel.app/how-to-play/game-screenshot-min.png)
+![game screenshot](https://rock-paper-scissors-shoot-beta.vercel.app/how-to-play/game-screenshot-min.png)
 
-Game developed by chabandou as submission for the JSM coding challenge.
+Game developed by chabandou as a submission for the JSM coding challenge.

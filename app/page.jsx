@@ -32,6 +32,8 @@ export default function Home() {
 
   const [gameStarted, setGameStarted] = useState(false);
 
+  let cardPlayedTime; 
+
   /// Power Cards logic
 
   const PowerCARDS = ["shoot", "pan"];
@@ -92,8 +94,6 @@ export default function Home() {
         };
       });
     }
-
-  
   }
 
   function roundSetup() {
@@ -125,10 +125,17 @@ export default function Home() {
         (gameState.player1.hand.length === 0 ||
           (gameState.player1.hand.length === 1 &&
             gameState.player1.hand[0] === "pan")) &&
-        (gameState.player2.deck.length > 0 || (gameState.player2.hand.length > 0 && gameState.player2.hand[0] !== "pan")) && !gameState.player1.activeCard)
+        (gameState.player2.deck.length > 0 ||
+          (gameState.player2.hand.length > 0 &&
+            gameState.player2.hand[0] !== "pan")) &&
+        !gameState.player1.activeCard)
     ) {
       setGameWinner("Player 2");
       setGameStarted(false);
+
+      // document.querySelector(".modal-box").scrollTop = 0;
+      // document.querySelector(".modal-content").scrollTop = 0;
+
       document.getElementById("endGameModal").showModal();
     } else if (
       gameState.player2.health <= 0 ||
@@ -136,10 +143,16 @@ export default function Home() {
         (gameState.player2.hand.length === 0 ||
           (gameState.player2.hand.length === 1 &&
             gameState.player2.hand[0] === "pan")) &&
-        (gameState.player1.deck.length > 0 || (gameState.player1.hand.length > 0 && gameState.player1.hand[0] !== "pan")) && !gameState.player2.activeCard)
+        (gameState.player1.deck.length > 0 ||
+          (gameState.player1.hand.length > 0 &&
+            gameState.player1.hand[0] !== "pan")) &&
+        !gameState.player2.activeCard)
     ) {
       setGameWinner("Player 1");
       setGameStarted(false);
+      // document.querySelector(".modal-box").scrollTop = 0;
+      // document.querySelector(".modal-content").scrollTop = 0;
+
       document.getElementById("endGameModal").showModal();
     } else if (
       gameState.player2.deck.length === 0 &&
@@ -147,26 +160,37 @@ export default function Home() {
     ) {
       if (
         gameState.player2.hand.length === 0 ||
-        (gameState.player2.hand.length === 1 && gameState.player2.hand[0] === "pan")
+        (gameState.player2.hand.length === 1 &&
+          gameState.player2.hand[0] === "pan")
       ) {
         if (
           gameState.player1.hand.length === 0 ||
-          (gameState.player1.hand.length === 1 && gameState.player1.hand[0] === "pan")
+          (gameState.player1.hand.length === 1 &&
+            gameState.player1.hand[0] === "pan")
         ) {
           if (gameState.player1.health > gameState.player2.health) {
             setGameWinner("Player 1");
             setGameStarted(false);
+            // document.querySelector(".modal-box").scrollTop = 0;
+            // document.querySelector(".modal-content").scrollTop = 0;
+
             document.getElementById("endGameModal").showModal();
           } else if (gameState.player2.health > gameState.player1.health) {
             setGameWinner("Player 2");
             setGameStarted(false);
+            // document.querySelector(".modal-box").scrollTop = 0;
+            // document.querySelector(".modal-content").scrollTop = 0;
+
             document.getElementById("endGameModal").showModal();
           } else {
             setGameWinner("It's a Draw!");
             setGameStarted(false);
+            // document.querySelector(".modal-box").scrollTop = 0;
+            // document.querySelector(".modal-content").scrollTop = 0;
+
             document.getElementById("endGameModal").showModal();
           }
-        } 
+        }
       }
     }
   }, [
@@ -185,7 +209,6 @@ export default function Home() {
   const [roundWinner, setRoundWinner] = useState(null);
 
   useEffect(() => {
-
     let player1Card = gameState.player1.activeCard;
     let player2Card = gameState.player2.activeCard;
 
@@ -209,7 +232,10 @@ export default function Home() {
         setTimeout(() => playRound(player1Card, player2Card), 3000);
       }
     }
-    if (player1Card && !player2Card) {
+
+    let timeElapsed = Date.now() - cardPlayedTime;
+
+    if (player1Card && !player2Card && timeElapsed > 1500) {
       let player1CardLogDisplay = fusionCards[player1Card]?.name
         ? fusionCards[player1Card]?.name
         : player1Card;
@@ -253,7 +279,7 @@ export default function Home() {
         }, 1000);
       }, 3000);
     }
-  }, [gameState.player1.activeCard, gameState.player2.activeCard]);
+  }, [gameState.player1.activeCard, gameState.player2.activeCard, cardPlayedTime]);
 
   function handlePanCounter(player) {
     if (player === 1) {
@@ -309,9 +335,8 @@ export default function Home() {
       setGameState({
         ...gameState,
       });
-   
+      cardPlayedTime = Date.now();
     } else {
-
       gameState.player2.activeCard = gameState.player2.hand[cardIndex];
       gameState.player2.hand = gameState.player2.hand.filter(
         (_, index) => index !== cardIndex
@@ -324,12 +349,10 @@ export default function Home() {
           activeCard: gameState.player2.activeCard,
         },
       });
-
     }
   };
 
   function playRound(player1Card, player2Card) {
-
     let player1CardLogDisplay = fusionCards[player1Card]?.name
       ? fusionCards[player1Card].name
       : player1Card;
@@ -447,7 +470,6 @@ export default function Home() {
       setRoundWinner(null);
       setRevealed(false);
     }, 1500);
- 
   }
 
   function handleCardEffect(player, card, index) {
@@ -484,7 +506,6 @@ export default function Home() {
   });
 
   async function endFusion(e, index, player) {
-
     let card2 =
       player === 1
         ? { card: e?.target.alt, index: index }
@@ -543,7 +564,6 @@ export default function Home() {
             ? gameState.player1.hand.push(card2.card + "pan")
             : gameState.player2.hand.push(card2.card + "pan");
         } else {
-
           player === 1
             ? gameState.player1.hand.push(card1.card + "pan")
             : gameState.player2.hand.push(card1.card + "pan");
@@ -751,7 +771,7 @@ export default function Home() {
 
             <HowToPlayModal />
             <div className="flex items-center justify-between font-mono text-white/80 px-1">
-              <span>Developed by:</span>
+              <span>Developed by</span>
               <span>chabandou</span>
             </div>
           </div>
@@ -912,7 +932,6 @@ export default function Home() {
             </MouseParallaxChild>
           </MouseParallaxContainer>
         </div>
-
         <EndGameModal
           gameState={gameState}
           setGameState={setGameState}
@@ -922,6 +941,7 @@ export default function Home() {
           matchLog={matchLog}
           setMatchLog={setMatchLog}
           setGameStarted={setGameStarted}
+          gameStarted={gameStarted}
         />
       </div>
     </main>
