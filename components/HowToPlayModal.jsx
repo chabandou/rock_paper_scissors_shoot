@@ -96,7 +96,7 @@ export default function HowToPlayModal() {
                   stroke-linecap="round"
                 ></path>
               </svg>
-              6 of them are the classic (Basic) Rock, Paper, Scissors
+              6 of them are the classic (Basic) Rock, Paper, Scissors, two of each
               represented as playing cards
             </li>
             <li className="group flex items-start py-1 ms-3">

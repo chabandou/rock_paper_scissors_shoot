@@ -93,7 +93,7 @@ export default function Modal({
             <div className="flex items-center justify-center gap-7">
               {PowerCARDS.map((powerCard) => (
                 <button
-                  className="btn leading-normal scale-[1.15] h-fit p-0 rounded-2xl"
+                  className="btn leading-normal scale-[1.15] h-fit p-0 rounded-2xl disabled:opacity-40"
                   key={powerCard}
                   onClick={() =>
                     setSelectedPowerCards((powerCards) => [
@@ -102,7 +102,7 @@ export default function Modal({
                     ])
                   }
                   disabled={
-                    cardsCounter(selectedPowerCards)[powerCard] === 4 ||
+                    cardsCounter(selectedPowerCards)[powerCard] === 3 ||
                     selectedPowerCards.length === 4
                   }
                 >
